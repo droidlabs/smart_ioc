@@ -1,4 +1,4 @@
-require_relative 'user'
+require_relative '../user'
 
 class UsersCreator
   include SmartIoC::Iocify

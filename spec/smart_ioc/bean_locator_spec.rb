@@ -11,13 +11,13 @@ describe SmartIoC::BeanLocator do
     locations = SmartIoC::BeanLocations.get_bean_locations(:users_repository)
 
     expect(locations[:test].size).to eq(1)
-    expect(locations[:test].first).to match(/example\/users_repository.rb/)
+    expect(locations[:test].first).to match(/example\/repository\/users_repository.rb/)
   }
 
   it {
     locations = SmartIoC::BeanLocations.get_bean_locations(:users_creator)
 
     expect(locations[:test].size).to eq(1)
-    expect(locations[:test].first).to match(/example\/users_creator.rb/)
+    expect(locations[:test].first).to match(/example\/services\/users_creator.rb/)
   }
 end
