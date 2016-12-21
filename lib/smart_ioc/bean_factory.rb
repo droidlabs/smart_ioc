@@ -1,116 +1,112 @@
-require 'ioc_rb/scopes'
-require 'ioc_rb/scopes/singleton_scope'
-require 'ioc_rb/scopes/prototype_scope'
-require 'ioc_rb/scopes/request_scope'
-
 # Instantiates beans according to their scopes
 class SmartIoC::BeanFactory
-  attr_reader :const_loader
-
-  # Constructor
-  # @param beans_metadata_storage [BeansMetadataStorage] storage of bean metadatas
-  def initialize(const_loader, beans_metadata_storage)
-    @const_loader           = const_loader
-    @beans_metadata_storage = beans_metadata_storage
-    @singleton_scope        = SmartIoC::Scopes::SingletonScope.new(self)
-    @prototype_scope        = SmartIoC::Scopes::PrototypeScope.new(self)
-    @request_scope          = SmartIoC::Scopes::RequestScope.new(self)
+  def initialize(bean_definitions_storage, extra_package_contexts)
+    @bean_definitions_storage = bean_definitions_storage
+    @extra_package_contexts   = extra_package_contexts
+    @singleton_scope          = SmartIoC::Scopes::Singleton.new
+    @prototype_scope          = SmartIoC::Scopes::Prototype.new
+    @thread_scope             = SmartIoC::Scopes::Request.new
+    @bean_file_loader         = SmartIoC::BeanFileLoader.new
+    @bean_definitions_cache   = {}
   end
 
-  # Get bean from the container by it's +name+.
-  # According to the bean scope it will be newly created or returned already
-  # instantiated bean
-  # @param [Symbol] bean name
+  def clear_scopes
+    all_scopes.each(&:clear)
+  end
+
+  def force_clear_scopes
+    all_scopes.each(&:force_clear)
+  end
+
+  # Get bean from the container by it's name, package, context
+  # @param name [Symbol] bean name
+  # @param package [Symbol] package name
+  # @param context [Symbol] context
   # @return bean instance
-  # @raise MissingBeanError if bean with the specified name is not found
-  def get_bean(name)
-    bean_metadata = @beans_metadata_storage.by_name(name)
-    unless bean_metadata
-      raise SmartIoC::Errors::MissingBeanError, "Bean with name :#{name} is not defined"
-    end
-    get_bean_with_metadata(bean_metadata)
-  end
-
-  # Get bean by the specified +bean metadata+
-  # @param [BeanMetadata] bean metadata
-  # @return bean instance
-  def get_bean_with_metadata(bean_metadata)
-    get_scope_by_metadata(bean_metadata).get_bean(bean_metadata)
-  end
-
-  # Create new bean instance according
-  # to the specified +bean_metadata+
-  # @param [BeanMetadata] bean metadata
-  # @return bean instance
-  # @raise MissingBeanError if some of bean dependencies are not found
-  def create_bean_and_save(bean_metadata, beans_storage)
-    if bean_metadata.bean_class.is_a?(Class)
-      bean_class = bean_metadata.bean_class
-    else
-      bean_class = const_loader.load_const(bean_metadata.bean_class)
-      bean_metadata.fetch_attrs!(bean_class)
-    end
-    bean = bean_metadata.instance ? bean_class.new : bean_class
-    if bean_metadata.has_factory_method?
-      set_bean_dependencies(bean, bean_metadata)
-      bean = bean.send(bean_metadata.factory_method)
-      beans_storage[bean_metadata.name] = bean
-    else
-      # put to container first to prevent circular dependencies
-      beans_storage[bean_metadata.name] = bean
-      set_bean_dependencies(bean, bean_metadata)
+  # @raise [ArgumentError] if bean is not found
+  # @raise [ArgumentError] if ambiguous bean definition was found
+  def get_bean(name, package: nil, context: nil)
+    if context.nil? && !package.nil?
+      context = @extra_package_contexts.get_context(package)
     end
 
-    bean
-  end
+    bean_definition = get_bean_definition(name, package, context)
+    scope = get_scope(bean_definition)
 
-  # Delete bean from the container by it's +name+.
-  # @param [Symbol] bean name
-  # @raise MissingBeanError if bean with the specified name is not found
-  def delete_bean(name)
-    bean_metadata = @beans_metadata_storage.by_name(name)
-    unless bean_metadata
-      raise SmartIoC::Errors::MissingBeanError, "Bean with name :#{name} is not defined"
-    end
-    get_scope_by_metadata(bean_metadata).delete_bean(bean_metadata)
+    scope.get_bean(bean_definition.klass) || load_bean(bean_definition, scope)
   end
 
   private
 
-  def set_bean_dependencies(bean, bean_metadata)
-    bean_metadata.attrs.each do |attr|
-      bean_metadata = @beans_metadata_storage.by_name(attr.ref)
-      unless bean_metadata
-        raise SmartIoC::Errors::MissingBeanError, "Bean with name :#{attr.ref} is not defined, check #{bean.class}"
-      end
-      case bean_metadata.scope
-      when :singleton
-        bean.send("#{attr.name}=", get_bean(attr.ref))
-      when :prototype
-        bean.instance_variable_set(:@_ioc_rb_bean_factory, self)
-        bean.define_singleton_method(attr.name) do
-          @_ioc_rb_bean_factory.get_bean(attr.ref)
-        end
-      when :request
-        bean.instance_variable_set(:@_ioc_rb_bean_factory, self)
-        bean.define_singleton_method(attr.name) do
-          @_ioc_rb_bean_factory.get_bean(attr.ref)
-        end
-      end
+  # @param bean_name [Symbol]
+  # @param [Symbol] bean name
+  # @param [Symbol] bean name
+  def get_bean_definition(bean_name, package_name, context_name)
+    key = "#{bean_name}_#{package_name}_#{context_name}"
+
+    if @bean_definitions_cache.has_key?(key)
+      return @bean_definitions_cache[key]
     end
+
+    @bean_file_loader.require_bean(bean_name)
+
+    bean_definitions = @bean_definitions_storage.find_all(bean_name, package_name, context_name)
+
+    if bean_definitions.size == 0
+      raise ArgumentError,  "bean :#{bean_name} is not defined"
+    elsif bean_definitions.size > 1
+      raise ArgumentError, "several packages for bean :#{bean_name} were found (#{bean_definitions.inspect}). Please specify package directly"
+    end
+
+    bean_definitoin = bean_definitions.first
+    @bean_definitions_cache[key] = bean_definitoin
+
+    bean_definitoin
   end
 
-  def get_scope_by_metadata(bean_metadata)
-    case bean_metadata.scope
-    when :singleton
-      @singleton_scope
-    when :prototype
-      @prototype_scope
-    when :request
-      @request_scope
+  def load_bean(bean_definition, scope)
+    bean = if bean_definition.is_instance?
+      bean_definition.klass.allocate
     else
-      raise SmartIoC::Errors::UnsupportedScopeError, "Bean with name :#{bean_metadata.name} has unsupported scope :#{bean_metadata.scope}"
+      bean_definition.klass
+    end
+
+    if bean_definition.has_factory_method?
+      bean = bean.send(bean_definition.factory_method)
+    end
+
+    scope.save_bean(bean_definition.klass, bean)
+    set_bean_dependencies(bean, bean_definition)
+
+    bean
+  end
+
+  def set_bean_dependencies(bean, bean_definition)
+    bean_definition.dependencies.each do |dependency|
+      context = if !dependency.package.nil?
+        @extra_package_contexts.get_context(dependency.package)
+      end
+
+      dependent_bean = get_bean(dependency.ref, package: dependency.package, context: context)
+
+      bean.instance_variable_set(:"@#{dependency.bean}", dependent_bean)
     end
   end
 
+  def get_scope(bean_definition)
+    case bean_definition.scope
+    when SmartIoC::Scopes::Singleton::VALUE
+      @singleton_scope
+    when SmartIoC::Scopes::Prototype::VALUE
+      @prototype_scope
+    when SmartIoC::Scopes::Request::VALUE
+      @thread_scope
+    else
+      raise ArgumentError, "bean definition for :#{bean_definition.name} has unsupported scope :#{bean_definition.scope}"
+    end
+  end
+
+  def all_scopes
+    [@singleton_scope, @prototype_scope, @thread_scope]
+  end
 end

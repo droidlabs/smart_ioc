@@ -1,25 +1,26 @@
-# Prototype scope instantiates new bean instance
-# on each +get_bean+ call
+# Prototype scope instantiates new bean instance on each call
 class SmartIoC::Scopes::Prototype
-
-  # Constructon
-  # @param bean_factory bean factory
-  def initialize(bean_factory)
-    @bean_factory = bean_factory
-  end
+  VALUE = :prototype
 
   # Get new bean instance
-  # @param bean_metadata [BeanMetadata] bean metadata
-  # @returns bean instance
-  def get_bean(bean_metadata)
-    @bean_factory.create_bean_and_save(bean_metadata, {})
+  # @param bean_definition [BeanDefinition] bean definition
+  # @returns nil
+  def get_bean(bean_definition)
+    # do nothing
   end
 
-  # Delete bean from scope,
-  # because Prototype scope doesn't store bean
-  # then do nothing here
-  #
-  # @param bean_metadata [BeanMetadata] bean metadata
-  def delete_bean(bean_metadata)
+  # @param klass [Class] bean class
+  # @param bean [Any Object] bean object
+  # @returns nil
+  def save_bean(klass, bean)
+    # do nothing
+  end
+
+  def clear
+    # do nothing
+  end
+
+  def force_clear
+    # do nothing
   end
 end

@@ -1,10 +1,13 @@
-# Singleton scope returns same bean instance on each call
-class SmartIoC::Scopes::Singleton
-  VALUE = :singleton
+# Request scope instantiates new bean instance if it's not present in Thread.current
+class SmartIoC::Scopes::Request < SmartIoC::Scopes::Singleton
+  VALUE = :request
+  KEY   = :__SmartIoC
 
+  # @param bean_factory bean factory
   def initialize
-    @beans = {}
+    clear
   end
+
 
   # @param klass [Class] bean class
   # @returns bean instance or nil if not stored
@@ -21,11 +24,12 @@ class SmartIoC::Scopes::Singleton
   end
 
   def clear
-    # do nothing as singleton beans are being instantiated only once
+    Thread.current[KEY] = {}
+    @beans = Thread.current[KEY]
+    nil
   end
 
   def force_clear
-    @beans = {}
-    nil
+    clear
   end
 end

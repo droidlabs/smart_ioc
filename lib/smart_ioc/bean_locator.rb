@@ -1,23 +1,34 @@
 class SmartIoC::BeanLocator
-  BEAN_PATTERN = /bean\s+(:[a-zA-z0-9\-\_])/
+  BEAN_PATTERN = /bean\s+(:[a-zA-z0-9\-\_]+)/
 
-  # @ dir [String] - source folder to find bean definitions
+  # @param package_name [Symbol] package name for bean (ex: :repository)
+  # @param dir [String] absolute path for directory with bean definitions
+  # @return nil
   def locate_beans(package_name, dir)
+    SmartIoC::BeanLocations.clear
+
+    if !package_name.is_a?(Symbol)
+      raise ArgumentError, 'package name should be a symbol'
+    end
+
+    package_name = package_name
+
     Dir.glob(File.join(dir, '**/*.rb')).each do |file_path|
       source_str = File.read(file_path)
 
-      beans = detect_beans(source_str)
+      beans = find_package_beans(source_str)
 
-      beans.each do |bean_sym|
-        SmartIoC::BeanLocatios.add_bean_definition_path(package_name, bean_sym, file_path)
+      beans.each do |bean_name|
+        SmartIoC::BeanLocations.add_bean(package_name, bean_name, file_path)
       end
     end
+    nil
   end
 
   private
 
-  def detect_beans(source_str)
+  def find_package_beans(source_str)
     tokens = source_str.scan(BEAN_PATTERN)
-    tokens.flatten.uniq.gsub(':', '').map(&:to_sym)
+    tokens.flatten.uniq.map {|token| token.gsub(':', '').to_sym}
   end
 end
