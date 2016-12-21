@@ -60,6 +60,18 @@ class SmartIoC::BeanDefinition
       )
   end
 
+  def inspect
+    str = ""
+    str << "class:          #{bean_definition.klass}"
+    str << "name:           :#{bean_definition.name}"
+    str << "package:        :#{bean_definition.package}"
+    str << "context:        :#{bean_definition.context}"
+    str << "path:           #{bean_definition.path}"
+    str << "instance:       #{bean_definition.instance}"
+    str << "factory_method: #{bean_definition.factory_method}"
+    str
+  end
+
   private
 
   def not_nil(value, name)

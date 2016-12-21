@@ -10,13 +10,12 @@ class SmartIoC::BeanDefinitionsStorage
     end
 
     if existing_bd
-      raise ArgumentError, %Q(
-        bean definition for bean :#{bean_definition.name}
-        from package :#{bean_definition.package}
-        with context :#{bean_definition.context}
-        already defined. See details
-        #{existing_bd.inspect}
-      )
+      raise ArgumentError, %Q(Error during add bean to bean definitions storage.
+        Bean definition already exists.
+        New bean details:
+          #{bean_definition.inspect}
+        Existing bean details:
+          #{existing_bd.inspect})
     end
 
     @collection.push(bean_definition)
