@@ -61,15 +61,15 @@ class SmartIoC::BeanDefinition
   end
 
   def inspect
-    str = ""
-    str << "class:          #{bean_definition.klass}"
-    str << "name:           :#{bean_definition.name}"
-    str << "package:        :#{bean_definition.package}"
-    str << "context:        :#{bean_definition.context}"
-    str << "path:           #{bean_definition.path}"
-    str << "instance:       #{bean_definition.instance}"
-    str << "factory_method: #{bean_definition.factory_method}"
-    str
+    str = []
+    str << "class:          #{@klass}"
+    str << "name:           :#{@name}"
+    str << "package:        :#{@package}"
+    str << "context:        :#{@context}"
+    str << "path:           #{@path}"
+    str << "instance:       #{@instance}"
+    str << "factory_method: #{@factory_method}"
+    str.join("\n")
   end
 
   private
