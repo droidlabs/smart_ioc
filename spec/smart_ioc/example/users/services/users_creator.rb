@@ -5,11 +5,11 @@ class UsersCreator
 
   bean :users_creator
 
-  inject :users_repository
+  inject :repository, from: :admins
   inject :logger
 
-  def create(email)
-    user = User.new(1, email)
-    users_repository.put(user)
+  def create(id, email)
+    user = User.new(id, email)
+    repository.put(user)
   end
 end

@@ -8,6 +8,10 @@ module SmartIoC
         @container ||= SmartIoC::Container.allocate
       end
 
+      def clear
+        @container = nil
+      end
+
       def get_bean(bean_name, package: nil, context: nil)
         get_instance.get_bean(bean_name, package: package, context: context)
       end

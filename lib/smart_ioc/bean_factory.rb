@@ -46,12 +46,6 @@ class SmartIoC::BeanFactory
   # @param [Symbol] bean name
   # @param [Symbol] bean name
   def get_bean_definition(bean_name, package_name, context_name)
-    key = "#{bean_name}_#{package_name}_#{context_name}"
-
-    if @bean_definitions_cache.has_key?(key)
-      return @bean_definitions_cache[key]
-    end
-
     @bean_file_loader.require_bean(bean_name)
 
     bean_definitions = @bean_definitions_storage.find_all(bean_name, package_name, context_name)
@@ -63,7 +57,6 @@ class SmartIoC::BeanFactory
     end
 
     bean_definitoin = bean_definitions.first
-    @bean_definitions_cache[key] = bean_definitoin
 
     bean_definitoin
   end
@@ -92,11 +85,13 @@ class SmartIoC::BeanFactory
 
       instantiated_deps << dependency
 
-      context = if !dependency.package.nil?
-        @extra_package_contexts.get_context(dependency.package)
+      package = dependency.package || bean_definition.package
+
+      context = if !package.nil?
+        @extra_package_contexts.get_context(dependency.package || bean_definition.package)
       end
 
-      dependent_bean = get_or_load_bean(dependency.ref, dependency.package, context, instantiated_deps)
+      dependent_bean = get_or_load_bean(dependency.ref, package, context, instantiated_deps)
 
       bean.instance_variable_set(:"@#{dependency.bean}", dependent_bean)
     end

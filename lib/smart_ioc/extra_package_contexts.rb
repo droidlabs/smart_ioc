@@ -17,7 +17,7 @@ class SmartIoC::ExtraPackageContexts
     @data[package_name] = context
   end
 
-  def get_package_context(package_name)
+  def get_context(package_name)
     @data[package_name] || SmartIoC::Container::DEFAULT_CONTEXT
   end
 

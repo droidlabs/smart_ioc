@@ -34,7 +34,6 @@ module SmartIoC::Iocify
       file_path = caller[0].split(':').first
 
       bean_definition = SmartIoC::Container.get_instance.get_bean_definition_by_class(self)
-      return if bean_definition
 
       bean_definition = SmartIoC::Container.get_instance.register_bean(
         bean_name:      bean_name,

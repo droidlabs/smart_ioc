@@ -1,7 +1,7 @@
-class UsersDAO
+class AdminsDAO
   include SmartIoC::Iocify
 
-  bean :users_dao, instance: false
+  bean :dao, instance: false
 
   @data = {}
 

@@ -34,5 +34,11 @@ module SmartIoC
     def load_all_beans
       SmartIoC::BeanLocations.load_all
     end
+
+    # Full clear of data (mostly for tests)
+    def clear
+      SmartIoC::BeanLocations.clear
+      SmartIoC::Container.clear
+    end
   end
 end

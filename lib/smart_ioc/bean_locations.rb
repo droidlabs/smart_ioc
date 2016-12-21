@@ -14,6 +14,9 @@ class SmartIoC::BeanLocations
   @data = {}
 
   class << self
+    def clear
+      @data = {}
+    end
 
     # @param package_name [Symbol] bean package name (ex: :repository)
     # @param bean [Symbol] bean name (ex: :users_repository)
@@ -23,10 +26,6 @@ class SmartIoC::BeanLocations
     def add_bean(package_name, bean, bean_path)
       @data[package_name] ||= {}
       package_beans = @data[package_name]
-
-      if package_beans.has_key?(bean)
-        raise ArgumentError, "bean :#{bean} was already defined in #{package_beans[bean]}"
-      end
 
       package_beans[bean] ||= []
       package_beans[bean].push(bean_path)

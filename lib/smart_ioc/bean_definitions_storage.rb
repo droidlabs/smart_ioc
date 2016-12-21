@@ -33,7 +33,7 @@ Existing bean details:
   # @bean_name [Symbol] bean name
   # @package [Symbol] package name
   # @context [Array[Symbol]] context
-  def find_all(bean_name, package = nil, contexts = [])
+  def find_all(bean_name, package = nil, context)
     bean_definitions = @collection.select do |bd|
       bd.name == bean_name
     end
@@ -44,9 +44,13 @@ Existing bean details:
       end
     end
 
-    if contexts
-      bean_definitions = bean_definitions.select do |bd|
+    if context
+      context_bean_definitions = bean_definitions.select do |bd|
         bd.context == context
+      end
+
+      if !context_bean_definitions.empty?
+        bean_definitions = context_bean_definitions
       end
     end
 
