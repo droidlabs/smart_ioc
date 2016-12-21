@@ -5,8 +5,6 @@ class SmartIoC::BeanLocator
   # @param dir [String] absolute path for directory with bean definitions
   # @return nil
   def locate_beans(package_name, dir)
-    SmartIoC::BeanLocations.clear
-
     if !package_name.is_a?(Symbol)
       raise ArgumentError, 'package name should be a symbol'
     end

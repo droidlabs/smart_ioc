@@ -25,7 +25,7 @@ module SmartIoC
     # @param dir [String] absolute path with bean definitions
     # @return nil
     def find_package_beans(package_name, dir)
-      bean_locator = SmartIoC::BeanLocator.new()
+      bean_locator = SmartIoC::BeanLocator.new
       bean_locator.locate_beans(package_name.to_sym, dir)
       nil
     end
