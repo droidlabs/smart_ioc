@@ -10,4 +10,8 @@ class SmartIoC::BeanDependency
   def ref
     @ref || @bean
   end
+
+  def ==(dependency)
+    dependency.bean == @bean && dependency.package == @package
+  end
 end

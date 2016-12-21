@@ -3,14 +3,14 @@ class UsersRepository
 
   bean :users_repository
 
-  inject :users_creator
+  inject :users_creator # just for testing purposes (circular load check)
+  inject :users_dao
 
   def put(user)
-    @data ||= {}
-    @data[user.email] = user
+    users_dao.insert(user)
   end
 
-  def get(email)
-    @data[email]
+  def get(id)
+    users_dao.get(id)
   end
 end

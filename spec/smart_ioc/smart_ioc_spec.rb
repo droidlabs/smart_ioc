@@ -12,6 +12,6 @@ describe SmartIoC do
     users_creator.create('test@test.com')
 
     users_repository = @container.get_bean(:users_repository)
-    expect(users_repository.get('test@test.com')).to be_a(User)
+    expect(users_repository.get(1)).to be_a(User)
   end
 end

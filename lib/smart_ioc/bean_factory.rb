@@ -26,6 +26,12 @@ class SmartIoC::BeanFactory
   # @raise [ArgumentError] if bean is not found
   # @raise [ArgumentError] if ambiguous bean definition was found
   def get_bean(name, package: nil, context: nil)
+    get_or_load_bean(name, package, context)
+  end
+
+  private
+
+  def get_or_load_bean(name, package, context, instantiated_deps = [])
     if context.nil? && !package.nil?
       context = @extra_package_contexts.get_context(package)
     end
@@ -33,10 +39,8 @@ class SmartIoC::BeanFactory
     bean_definition = get_bean_definition(name, package, context)
     scope = get_scope(bean_definition)
 
-    scope.get_bean(bean_definition.klass) || load_bean(bean_definition, scope)
+    scope.get_bean(bean_definition.klass) || load_bean(bean_definition, scope, instantiated_deps)
   end
-
-  private
 
   # @param bean_name [Symbol]
   # @param [Symbol] bean name
@@ -64,30 +68,35 @@ class SmartIoC::BeanFactory
     bean_definitoin
   end
 
-  def load_bean(bean_definition, scope)
+  def load_bean(bean_definition, scope, instantiated_deps = [])
     bean = if bean_definition.is_instance?
       bean_definition.klass.allocate
     else
       bean_definition.klass
     end
 
+    set_bean_dependencies(bean, bean_definition, instantiated_deps)
+
     if bean_definition.has_factory_method?
       bean = bean.send(bean_definition.factory_method)
     end
 
     scope.save_bean(bean_definition.klass, bean)
-    set_bean_dependencies(bean, bean_definition)
 
     bean
   end
 
-  def set_bean_dependencies(bean, bean_definition)
+  def set_bean_dependencies(bean, bean_definition, instantiated_deps)
     bean_definition.dependencies.each do |dependency|
+      next if instantiated_deps.include?(dependency)
+
+      instantiated_deps << dependency
+
       context = if !dependency.package.nil?
         @extra_package_contexts.get_context(dependency.package)
       end
 
-      dependent_bean = get_bean(dependency.ref, package: dependency.package, context: context)
+      dependent_bean = get_or_load_bean(dependency.ref, dependency.package, context, instantiated_deps)
 
       bean.instance_variable_set(:"@#{dependency.bean}", dependent_bean)
     end
