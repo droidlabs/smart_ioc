@@ -14,10 +14,6 @@ class SmartIoC::BeanLocations
   @data = {}
 
   class << self
-    def clear
-      @data = {}
-    end
-
     # @param package_name [Symbol] bean package name (ex: :repository)
     # @param bean [Symbol] bean name (ex: :users_repository)
     # @param bean_path [String] bean name (ex: :users_repository)

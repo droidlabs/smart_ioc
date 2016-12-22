@@ -31,24 +31,34 @@ class SmartIoC::BeanFactory
 
   private
 
-  def get_or_load_bean(name, package, context, instantiated_deps = [])
+  def get_or_load_bean(name, package, context, instantiated_deps = [], parent_bean_package = nil)
     if context.nil? && !package.nil?
       context = @extra_package_contexts.get_context(package)
     end
 
-    bean_definition = get_bean_definition(name, package, context)
+    bean_definition = get_bean_definition(name, package, context, parent_bean_package)
     scope = get_scope(bean_definition)
 
-    scope.get_bean(bean_definition.klass) || load_bean(bean_definition, scope, instantiated_deps)
+    scope.get_bean(bean_definition.klass) || load_bean(bean_definition, scope, instantiated_deps, parent_bean_package)
   end
 
   # @param bean_name [Symbol]
   # @param [Symbol] bean name
   # @param [Symbol] bean name
-  def get_bean_definition(bean_name, package_name, context_name)
+  def get_bean_definition(bean_name, package_name, context_name, parent_bean_package)
     @bean_file_loader.require_bean(bean_name)
 
     bean_definitions = @bean_definitions_storage.find_all(bean_name, package_name, context_name)
+
+    if package_name.nil? && !parent_bean_package.nil?
+      filtered_bean_definitions = bean_definitions.select do |bd|
+        bd.package == parent_bean_package
+      end
+
+      if filtered_bean_definitions.size > 0
+        bean_definitions = filtered_bean_definitions
+      end
+    end
 
     if bean_definitions.size == 0
       raise ArgumentError,  "bean :#{bean_name} is not defined"
@@ -61,14 +71,14 @@ class SmartIoC::BeanFactory
     bean_definitoin
   end
 
-  def load_bean(bean_definition, scope, instantiated_deps = [])
+  def load_bean(bean_definition, scope, instantiated_deps = [], parent_bean_package = nil)
     bean = if bean_definition.is_instance?
       bean_definition.klass.allocate
     else
       bean_definition.klass
     end
 
-    set_bean_dependencies(bean, bean_definition, instantiated_deps)
+    set_bean_dependencies(bean, bean_definition, instantiated_deps, parent_bean_package)
 
     if bean_definition.has_factory_method?
       bean = bean.send(bean_definition.factory_method)
@@ -79,19 +89,17 @@ class SmartIoC::BeanFactory
     bean
   end
 
-  def set_bean_dependencies(bean, bean_definition, instantiated_deps)
+  def set_bean_dependencies(bean, bean_definition, instantiated_deps, parent_bean_package)
     bean_definition.dependencies.each do |dependency|
       next if instantiated_deps.include?(dependency)
 
       instantiated_deps << dependency
 
-      package = dependency.package || bean_definition.package
-
-      context = if !package.nil?
-        @extra_package_contexts.get_context(dependency.package || bean_definition.package)
+      context = if dependency.package
+        @extra_package_contexts.get_context(dependency.package)
       end
 
-      dependent_bean = get_or_load_bean(dependency.ref, package, context, instantiated_deps)
+      dependent_bean = get_or_load_bean(dependency.ref, dependency.package, context, instantiated_deps, bean_definition.package)
 
       bean.instance_variable_set(:"@#{dependency.bean}", dependent_bean)
     end
