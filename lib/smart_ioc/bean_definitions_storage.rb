@@ -30,10 +30,30 @@ Existing bean details:
     @collection.detect {|bd| bd.klass == klass}
   end
 
+  def filter_by(bean_name, package = nil, context = nil)
+    bean_definitions = @collection.select do |bd|
+      bd.name == bean_name
+    end
+
+    if package
+      bean_definitions = bean_definitions.select do |bd|
+        bd.package == package
+      end
+    end
+
+    if context
+      bean_definitions = bean_definitions.select do |bd|
+        bd.context == context
+      end
+    end
+
+    bean_definitions
+  end
+
   # @bean_name [Symbol] bean name
   # @package [Symbol] package name
   # @context [Array[Symbol]] context
-  def find_all(bean_name, package = nil, context)
+  def filter_by_with_drop_to_default_context(bean_name, package = nil, context = nil)
     bean_definitions = @collection.select do |bd|
       bd.name == bean_name
     end

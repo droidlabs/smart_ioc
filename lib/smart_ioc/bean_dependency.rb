@@ -1,5 +1,6 @@
 class SmartIoC::BeanDependency
   attr_reader :bean, :ref, :package
+  attr_accessor :bean_definition
 
   def initialize(bean:, ref:, package:)
     @bean = bean
