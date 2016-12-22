@@ -32,8 +32,10 @@ class SmartIoC::BeanFactory
   private
 
   def get_or_load_bean(name, package, context, instantiated_deps = [], parent_bean_package = nil)
-    if context.nil? && !package.nil?
-      context = @extra_package_contexts.get_context(package)
+    context = if package
+      @extra_package_contexts.get_context(package)
+    else
+      SmartIoC::Container::DEFAULT_CONTEXT
     end
 
     bean_definition = get_bean_definition(name, package, context, parent_bean_package)

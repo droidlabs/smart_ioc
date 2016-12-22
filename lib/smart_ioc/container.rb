@@ -107,7 +107,7 @@ module SmartIoC
     # @param package_name [Symbol] package name
     # @param context [Symbol] context (ex: :test)
     def set_extra_context_for_package(package_name, context)
-      self.extra_package_contexts.set_context(package_name, context)
+      extra_package_contexts.set_context(package_name, context)
     end
 
     # @param bean_name [Symbol] bean name
@@ -118,7 +118,7 @@ module SmartIoC
       bean_factory.get_bean(bean_name, package: package, context: context)
     end
 
-    def clear_scope
+    def clear_scopes
       bean_factory.clear_scopes
     end
 
@@ -133,7 +133,7 @@ module SmartIoC
     end
 
     def extra_package_contexts
-      @extra_package_contexts = SmartIoC::ExtraPackageContexts.new
+      @extra_package_contexts ||= SmartIoC::ExtraPackageContexts.new
     end
 
     def bean_definitions_storage
