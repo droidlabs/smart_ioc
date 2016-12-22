@@ -101,6 +101,10 @@ class SmartIoC::BeanFactory
       raise ArgumentError, "Unable to autodetect bean :#{bean}.\nSeveral definitions were found.\n#{smart_bds.map(&:inspect).join("\n\n")}. Set package directly for injected dependency"
     end
 
+    if smart_bds.size == 0
+      raise ArgumentError, "Unable to find bean :#{bean} in any package."
+    end
+
     return smart_bds.first
   end
 
