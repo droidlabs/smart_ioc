@@ -35,6 +35,9 @@ module SmartIoC::Iocify
 
       bean_definition = SmartIoC::Container.get_instance.get_bean_definition_by_class(self)
 
+      # skip if bean was registered
+      return if bean_definition
+
       bean_definition = SmartIoC::Container.get_instance.register_bean(
         bean_name:      bean_name,
         klass:          self,
