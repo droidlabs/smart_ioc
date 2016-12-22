@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    smart_ioc (0.1.6)
+    smart_ioc (0.1.7)
 
 GEM
   remote: https://rubygems.org/
