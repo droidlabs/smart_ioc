@@ -149,9 +149,15 @@ class SmartIoC::BeanFactory
     end
 
     bd_with_factory_methods.each do |bean_definition|
+      next if bean_definition.dependencies.size == 0
+
       if cross_refference_bd = get_cross_refference(bd_with_factory_methods, bean_definition, dependency_cache)
         raise ArgumentError, "Factory method beans should not cross refference each other. Bean :#{bean_definition.name} cross refferences bean :#{cross_refference_bd.name}."
       end
+    end
+
+    bd_with_factory_methods = bd_with_factory_methods.sort_by do |bean_definition|
+      bean_definition.dependencies.size
     end
 
     bd_with_factory_methods.each do |bean_definition|
