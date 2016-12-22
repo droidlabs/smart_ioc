@@ -31,7 +31,7 @@ class SmartIoC::BeanFactory
 
   private
 
-  def get_or_load_bean(name, package, context, instantiated_deps = [], parent_bean_package = nil)
+  def get_or_load_bean(name, package, context, parent_bean_package = nil)
     context = if package
       @extra_package_contexts.get_context(package)
     else
@@ -41,7 +41,7 @@ class SmartIoC::BeanFactory
     bean_definition = get_bean_definition(name, package, context, parent_bean_package)
     scope = get_scope(bean_definition)
 
-    scope.get_bean(bean_definition.klass) || load_bean(bean_definition, scope, instantiated_deps, parent_bean_package)
+    scope.get_bean(bean_definition.klass) || load_bean(bean_definition, scope, parent_bean_package)
   end
 
   # @param bean_name [Symbol]
@@ -73,14 +73,14 @@ class SmartIoC::BeanFactory
     bean_definitoin
   end
 
-  def load_bean(bean_definition, scope, instantiated_deps = [], parent_bean_package = nil)
+  def load_bean(bean_definition, scope, parent_bean_package = nil)
     bean = if bean_definition.is_instance?
       bean_definition.klass.allocate
     else
       bean_definition.klass
     end
 
-    set_bean_dependencies(bean, bean_definition, instantiated_deps, parent_bean_package)
+    set_bean_dependencies(bean, bean_definition, parent_bean_package)
 
     if bean_definition.has_factory_method?
       bean = bean.send(bean_definition.factory_method)
@@ -91,17 +91,13 @@ class SmartIoC::BeanFactory
     bean
   end
 
-  def set_bean_dependencies(bean, bean_definition, instantiated_deps, parent_bean_package)
+  def set_bean_dependencies(bean, bean_definition, parent_bean_package)
     bean_definition.dependencies.each do |dependency|
-      next if instantiated_deps.include?(dependency)
-
-      instantiated_deps << dependency
-
       context = if dependency.package
         @extra_package_contexts.get_context(dependency.package)
       end
 
-      dependent_bean = get_or_load_bean(dependency.ref, dependency.package, context, instantiated_deps, bean_definition.package)
+      dependent_bean = get_or_load_bean(dependency.ref, dependency.package, context, bean_definition.package)
 
       bean.instance_variable_set(:"@#{dependency.bean}", dependent_bean)
     end

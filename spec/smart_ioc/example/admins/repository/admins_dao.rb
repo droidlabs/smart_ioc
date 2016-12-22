@@ -3,10 +3,13 @@ class AdminsDAO
 
   bean :dao, instance: false
 
+  inject :config
+
   @data = {}
 
   class << self
     def insert(entity)
+      config.app_name
       @data[entity.id] = entity
     end
 
