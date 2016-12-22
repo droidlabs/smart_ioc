@@ -140,27 +140,26 @@ class SmartIoC::BeanFactory
 
   def load_bean(bean_definition, dependency_cache, beans_cache)
     # first let's setup beans with factory_methods
+    zero_dep_bd_with_factory_methods = []
     bd_with_factory_methods = []
 
     beans_cache.each do |bean_definition, bean|
       if bean_definition.has_factory_method?
-        bd_with_factory_methods << bean_definition
+        if bean_definition.dependencies.size == 0
+          zero_dep_bd_with_factory_methods << bean_definition
+        else
+          bd_with_factory_methods << bean_definition
+        end
       end
     end
 
     bd_with_factory_methods.each do |bean_definition|
-      next if bean_definition.dependencies.size == 0
-
       if cross_refference_bd = get_cross_refference(bd_with_factory_methods, bean_definition, dependency_cache)
         raise ArgumentError, "Factory method beans should not cross refference each other. Bean :#{bean_definition.name} cross refferences bean :#{cross_refference_bd.name}."
       end
     end
 
-    bd_with_factory_methods = bd_with_factory_methods.sort_by do |bean_definition|
-      bean_definition.dependencies.size
-    end
-
-    bd_with_factory_methods.each do |bean_definition|
+    (zero_dep_bd_with_factory_methods + bd_with_factory_methods).each do |bean_definition|
       inject_beans(bean_definition, dependency_cache, beans_cache)
       bean = beans_cache[bean_definition]
       bean = bean.send(bean_definition.factory_method)

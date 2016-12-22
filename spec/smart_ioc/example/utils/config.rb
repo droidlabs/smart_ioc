@@ -1,9 +1,15 @@
 class Config
   include SmartIoC::Iocify
 
-  bean :config
+  bean :config, factory_method: :get_config
 
-  def app_name
-    'SmartIoC'
+  class TestConfig
+    def app_name
+      'SmartIoC'
+    end
+  end
+
+  def get_config
+    TestConfig.new
   end
 end
