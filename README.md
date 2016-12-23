@@ -17,10 +17,12 @@ SmartIoC is a smart and really simple IoC container for Ruby applications.
 2. For a specific package you can declare beans with same name if they have different context.
     ```ruby
     class UsersRepository
+      include SmartIoC::Iocify
       bean :users_repository
     end
 
     class Test::UsersRepository
+      include SmartIoC::Iocify
       bean :users_repository, context: :test
     end
     ```
@@ -34,6 +36,7 @@ This allows to create test implementations that for any package dependencies.
 5. If you have name with same bean in different packages you will need to set package directly. You can simply do that in the following way:
     ```ruby
     class UsersCreator
+      include SmartIoC::Iocify
       bean :users_creator
 
       inject :users_repository, from: :repositories
@@ -48,6 +51,7 @@ This allows to create test implementations that for any package dependencies.
 6. Change dependency name inside your bean:
     ```ruby
     class UsersCreator
+      include SmartIoC::Iocify
       bean :users_creator
 
       inject :repo, ref: :users_repository, from: :repositories
@@ -61,6 +65,7 @@ This allows to create test implementations that for any package dependencies.
 7.  Use factory method to instantiate the bean
     ```ruby
     class RepositoryFactory
+      include SmartIoC::Iocify
       bean :users_creator, factory_method: :get_bean
 
       inject :config
@@ -85,7 +90,9 @@ This allows to create test implementations that for any package dependencies.
 
     ```ruby
     class UsersCreator
+      include SmartIoC::Iocify
       bean :users_creator, instance: false
+
       inject :users_repository
     end
     ```
