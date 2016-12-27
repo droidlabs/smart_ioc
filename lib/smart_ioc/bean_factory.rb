@@ -39,7 +39,7 @@ class SmartIoC::BeanFactory
 
     @bean_file_loader.require_bean(bean_name)
 
-    bds = @bean_definitions_storage.filter_by(bean_name, package, context)
+    bds = @bean_definitions_storage.filter_by_with_drop_to_default_context(bean_name, package, context)
     if bds.size > 1
       raise ArgumentError, "Unable to create bean :#{bean_name}.\nSeveral definitions were found.\n#{bds.map(&:inspect).join("\n\n")}"
     elsif bds.size == 0
