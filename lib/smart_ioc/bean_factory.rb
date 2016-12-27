@@ -28,6 +28,7 @@ class SmartIoC::BeanFactory
     context ||= if package
       @extra_package_contexts.get_context(package)
     else
+      @bean_file_loader.require_bean(bean_name)
       bean_definition = autodetect_bean_definition(bean_name, package, nil)
       bean_definition.context
     end

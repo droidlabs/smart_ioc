@@ -114,7 +114,7 @@ module SmartIoC
     # @param optional package [Symbol] package name
     # @param optional context [Symbol] package context
     # @return bean instance from container
-    def get_bean(bean_name, package: nil, context: SmartIoC::Container::DEFAULT_CONTEXT)
+    def get_bean(bean_name, package: nil, context: nil)
       bean_factory.get_bean(bean_name, package: package, context: context)
     end
 
