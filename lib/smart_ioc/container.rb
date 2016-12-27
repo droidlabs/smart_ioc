@@ -12,7 +12,7 @@ module SmartIoC
         @container = nil
       end
 
-      def get_bean(bean_name, package: nil, context: SmartIoC::Container::DEFAULT_CONTEXT)
+      def get_bean(bean_name, package: nil, context: nil)
         get_instance.get_bean(bean_name, package: package, context: context)
       end
     end

@@ -24,7 +24,14 @@ class SmartIoC::BeanFactory
   # @return bean instance
   # @raise [ArgumentError] if bean is not found
   # @raise [ArgumentError] if ambiguous bean definition was found
-  def get_bean(bean_name, package: nil, context: SmartIoC::Container::DEFAULT_CONTEXT)
+  def get_bean(bean_name, package: nil, context: nil)
+    context ||= if package
+      @extra_package_contexts.get_context(package)
+    else
+      bean_definition = autodetect_bean_definition(bean_name, package, nil)
+      bean_definition.context
+    end
+
     if !context.is_a?(Symbol)
       raise ArgumentError, 'context should be a Symbol'
     end
