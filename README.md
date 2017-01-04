@@ -9,9 +9,9 @@ SmartIoC is a smart and really simple IoC container for Ruby applications.
 ## Setup
    Set package name and source package folder with beans. SmartIoC will parse source files and detect bean definitions automatically for you.
 
-   ```ruby
-      SmartIoC.find_package_beans(:PACKAGE_NAME, File.dirname(__FILE__))
-   ```
+```ruby
+SmartIoC.find_package_beans(:PACKAGE_NAME, File.dirname(__FILE__))
+```
 
     If you have saveral packages in your application (like if you are using [rdm package manager](https://github.com/droidlabs/rdm)) you can run SmartIoC.find_package_beans several time pointing it to source folder and setting different package name.
 
@@ -37,65 +37,71 @@ SmartIoC is a smart and really simple IoC container for Ruby applications.
 This allows to create test implementations that for any package dependencies.
 4. In order to get bean use `SmartIoC::Container.get_bean(:BEAN_NAME, package: :PACKAGE_NAME, context: :default)`. `package` and `context` are optional arguments.
 5. If you have name with same bean in different packages you will need to set package directly. You can simply do that in the following way:
-    ```ruby
-    class UsersCreator
-      include SmartIoC::Iocify
-      bean :users_creator
 
-      inject :users_repository, from: :repositories
+```ruby
+class UsersCreator
+  include SmartIoC::Iocify
+  bean :users_creator
 
-      def create
-        user = User.new
-        users_repository.put(user)
-      end
+  inject :users_repository, from: :repositories
 
-    end
-    ```
+  def create
+    user = User.new
+    users_repository.put(user)
+  end
+
+end
+```
+
 6. Change dependency name inside your bean:
-    ```ruby
-    class UsersCreator
-      include SmartIoC::Iocify
-      bean :users_creator
 
-      inject :repo, ref: :users_repository, from: :repositories
+```ruby
+class UsersCreator
+  include SmartIoC::Iocify
+  bean :users_creator
 
-      def create
-        user = User.new
-        repo.put(user)
-      end
-    end
-    ```
+  inject :repo, ref: :users_repository, from: :repositories
+
+  def create
+    user = User.new
+    repo.put(user)
+  end
+end
+```
+
 7.  Use factory method to instantiate the bean
-    ```ruby
-    class RepositoryFactory
-      include SmartIoC::Iocify
-      bean :users_creator, factory_method: :get_bean
 
-      inject :config
-      inject :users_repository
-      inject :admins_repository
+```ruby
+class RepositoryFactory
+  include SmartIoC::Iocify
+  bean :users_creator, factory_method: :get_bean
 
-      def get_bean
-        if config.admin_access?
-          admins_repository
-        else
-          users_repository
-        end
-      end
+  inject :config
+  inject :users_repository
+  inject :admins_repository
 
-      def create
-        user = User.new
-        repo.put(user)
-      end
+  def get_bean
+    if config.admin_access?
+      admins_repository
+    else
+      users_repository
     end
-    ```
+  end
+
+  def create
+    user = User.new
+    repo.put(user)
+  end
+end
+```
+
 8. Class level beans (object will not be instantiated and class will be used for that bean instead). Set `instance: false`:
 
-    ```ruby
-    class UsersCreator
-      include SmartIoC::Iocify
-      bean :users_creator, instance: false
+```ruby
+class UsersCreator
+  include SmartIoC::Iocify
+  bean :users_creator, instance: false
 
-      inject :users_repository
-    end
-    ```
+  inject :users_repository
+end
+```
