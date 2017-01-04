@@ -7,7 +7,13 @@ GEM
   remote: https://rubygems.org/
   specs:
     byebug (9.0.6)
+    codecov (0.1.9)
+      json
+      simplecov
+      url
     diff-lcs (1.2.5)
+    docile (1.1.5)
+    json (2.0.2)
     rake (10.1.1)
     rspec (2.14.1)
       rspec-core (~> 2.14.0)
@@ -17,6 +23,12 @@ GEM
     rspec-expectations (2.14.4)
       diff-lcs (>= 1.1.3, < 2.0)
     rspec-mocks (2.14.4)
+    simplecov (0.12.0)
+      docile (~> 1.1.0)
+      json (>= 1.8, < 3)
+      simplecov-html (~> 0.10.0)
+    simplecov-html (0.10.0)
+    url (0.3.2)
 
 PLATFORMS
   ruby
@@ -24,6 +36,7 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.3)
   byebug
+  codecov
   rake
   rspec
   smart_ioc!
