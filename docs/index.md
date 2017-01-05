@@ -13,30 +13,35 @@ SmartIoC is a smart and really simple IoC container for Ruby applications.
 SmartIoC.find_package_beans(:PACKAGE_NAME, File.dirname(__FILE__))
 ```
 
-    If you have saveral packages in your application (like if you are using [rdm package manager](https://github.com/droidlabs/rdm)) you can run SmartIoC.find_package_beans several time pointing it to source folder and setting different package name.
+If you have several packages in your application (like if you are using [rdm package manager](https://github.com/droidlabs/rdm)) you can run SmartIoC.find_package_beans several time pointing it to the source folder and setting a different package name.
 
 ## Basic information
 1. Different packages can use beans with same name.
 2. For a specific package you can declare beans with same name if they have different context.
-    ```ruby
-    class UsersRepository
-      include SmartIoC::Iocify
-      bean :users_repository
-    end
 
-    class Test::UsersRepository
-      include SmartIoC::Iocify
-      bean :users_repository, context: :test
-    end
-    ```
-3. You can extend `:default` context with any other in the following way:
+```ruby
+class UsersRepository
+  include SmartIoC::Iocify
+  bean :users_repository
+end
 
-   ```ruby
-   SmartIoC::Container.get_instance.set_extra_context_for_package(:YOUR_PACKAGE_NAME, :test)
-   ```
-This allows to create test implementations that for any package dependencies.
-4. In order to get bean use `SmartIoC::Container.get_bean(:BEAN_NAME, package: :PACKAGE_NAME, context: :default)`. `package` and `context` are optional arguments.
-5. If you have name with same bean in different packages you will need to set package directly. You can simply do that in the following way:
+class Test::UsersRepository
+  include SmartIoC::Iocify
+  bean :users_repository, context: :test
+end
+```
+
+3. You can extend the `:default` context with any other in the following way:
+
+```ruby
+SmartIoC::Container.get_instance.set_extra_context_for_package(:YOUR_PACKAGE_NAME, :test)
+```
+
+This allows to create test implementations for any package dependency.
+
+4. In order to get a bean use `SmartIoC::Container.get_bean(:BEAN_NAME, package: :PACKAGE_NAME, context: :default)`. `package` and `context` are optional arguments.
+
+5. If you use the same bean name for different dependencies in different packages you will need to specify the  package directly. You can do that by using `from` parameter:
 
 ```ruby
 class UsersCreator
@@ -53,14 +58,15 @@ class UsersCreator
 end
 ```
 
-6. Change dependency name inside your bean:
+6. To have a diffent local name for a specific bean use the `ref` parameter.
+In the following example we are injecting the `:users_repository` dependency but refer to it as `repo` locally.
 
 ```ruby
 class UsersCreator
   include SmartIoC::Iocify
   bean :users_creator
 
-  inject :repo, ref: :users_repository, from: :repositories
+  inject :users_repository, ref: :repo, from: :repositories
 
   def create
     user = User.new
@@ -69,7 +75,7 @@ class UsersCreator
 end
 ```
 
-7.  Use factory method to instantiate the bean
+7. Use factory method to instantiate the bean via a special creational method
 
 ```ruby
 class RepositoryFactory
