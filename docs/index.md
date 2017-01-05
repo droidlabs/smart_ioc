@@ -18,7 +18,6 @@ If you have several packages in your application (like if you are using [rdm pac
 ## Basic information
 1. Different packages can use beans with same name.
 2. For a specific package you can declare beans with same name if they have different context.
-
 ```ruby
 class UsersRepository
   include SmartIoC::Iocify
@@ -30,9 +29,7 @@ class Test::UsersRepository
   bean :users_repository, context: :test
 end
 ```
-
 3. You can extend the `:default` context with any other in the following way:
-
 ```ruby
 SmartIoC::Container.get_instance.set_extra_context_for_package(:YOUR_PACKAGE_NAME, :test)
 ```
