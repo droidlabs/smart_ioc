@@ -1,4 +1,6 @@
-[![Build Status](https://travis-ci.org/ddd-ruby/smart_ioc.png)](https://travis-ci.org/ddd-ruby/smart_ioc) [![codecov](https://codecov.io/gh/ddd-ruby/smart_ioc/branch/master/graph/badge.svg)](https://codecov.io/gh/ddd-ruby/smart_ioc)
+[![Build Status](https://travis-ci.org/ddd-ruby/smart_ioc.png)](https://travis-ci.org/ddd-ruby/smart_ioc)
+[![codecov](https://codecov.io/gh/ddd-ruby/smart_ioc/branch/master/graph/badge.svg)](https://codecov.io/gh/ddd-ruby/smart_ioc)
+[![Dependency Status](https://gemnasium.com/ddd-ruby/smart_ioc.png)](https://gemnasium.com/ddd-ruby/smart_ioc)
 
 
 SmartIoC is a smart and really simple IoC container for Ruby applications.
