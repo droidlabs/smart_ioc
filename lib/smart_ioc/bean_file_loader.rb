@@ -6,19 +6,12 @@ class SmartIoC::BeanFileLoader
   # @param bean_name [Symbol] bean name
   # return nil
   def require_bean(bean_name)
-    locations = SmartIoC::BeanLocations.get_bean_locations(bean_name)
+    locations = SmartIoC::BeanLocations.get_bean_locations(bean_name).values.flatten
 
-    # load *.rb file if extra bean location was added or it was not loaded yet
-    location_count = locations.values.flatten.size
-
-    if !@loaded_locations.has_key?(bean_name) || @loaded_locations[bean_name] != location_count
-      locations.each do |package_name, locations|
-        locations.each do |location|
-          require location
-        end
-      end
-
-      @loaded_locations[bean_name] = location_count
+    locations.each do |location|
+      next if @loaded_locations.has_key?(location)
+      @loaded_locations[location] = true
+      load location
     end
 
     nil

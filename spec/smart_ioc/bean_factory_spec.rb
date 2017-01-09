@@ -1,19 +1,23 @@
 require 'spec_helper'
 
 describe SmartIoC::BeanFactory do
-  class Repo
-    include SmartIoC::Iocify
-    bean :repo, context: :default, package: :bean_factory
-  end
+  before :all do
+    SmartIoC.clear
 
-  class TestRepo
-    include SmartIoC::Iocify
-    bean :repo, context: :test, package: :bean_factory
-  end
+    class Repo
+      include SmartIoC::Iocify
+      bean :repo, context: :default, package: :bean_factory
+    end
 
-  class DAO
-    include SmartIoC::Iocify
-    bean :dao, context: :default, package: :bean_factory
+    class TestRepo
+      include SmartIoC::Iocify
+      bean :repo, context: :test, package: :bean_factory
+    end
+
+    class DAO
+      include SmartIoC::Iocify
+      bean :dao, context: :default, package: :bean_factory
+    end
   end
 
   it 'returns proper bean for test context' do

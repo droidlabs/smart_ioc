@@ -1,6 +1,10 @@
 require 'spec_helper'
 
 describe Object do
+  before :all do
+    SmartIoC.clear
+  end
+
   describe '::inject' do
     before :all do
       class TestClass
