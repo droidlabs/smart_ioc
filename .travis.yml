@@ -1,3 +1,7 @@
 rvm:
-- 2.0.0
-script: "bundle exec rspec spec/"
+- 2.2.0
+- 2.3.0
+- 2.4.0
+script:
+- "gem install bundler"
+- "bundle exec rspec spec/"
