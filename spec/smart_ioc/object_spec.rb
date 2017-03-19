@@ -31,19 +31,17 @@ describe Object do
         bean :my_bean, scope: :request, package: :my_package, instance: false,
                        factory_method: :my_method, context: :test
       end
+
+      @bean_definition = SmartIoC.get_bean_definition_by_class(BeanClass)
     end
 
-    it {
-      bean_definition = SmartIoC::Container.get_instance.get_bean_definition_by_class(BeanClass)
-
-      expect(bean_definition.name).to eq(:my_bean)
-      expect(bean_definition.package).to eq(:my_package)
-      expect(bean_definition.path).to match(/object_spec.rb/)
-      expect(bean_definition.klass).to eq(BeanClass)
-      expect(bean_definition.scope).to eq(:request)
-      expect(bean_definition.instance).to eq(false)
-      expect(bean_definition.factory_method).to eq(:my_method)
-      expect(bean_definition.context).to eq(:test)
-    }
+    it { expect(@bean_definition.name).to eq(:my_bean) }
+    it { expect(@bean_definition.package).to eq(:my_package) }
+    it { expect(@bean_definition.path).to match(/object_spec.rb/) }
+    it { expect(@bean_definition.klass).to eq(BeanClass) }
+    it { expect(@bean_definition.scope).to eq(:request) }
+    it { expect(@bean_definition.instance).to eq(false) }
+    it { expect(@bean_definition.factory_method).to eq(:my_method) }
+    it { expect(@bean_definition.context).to eq(:test) }
   end
 end

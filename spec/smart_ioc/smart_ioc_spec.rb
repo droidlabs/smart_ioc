@@ -13,7 +13,11 @@ describe SmartIoC do
     dir_path = File.join(File.expand_path(File.dirname(__FILE__)), 'example/utils')
     SmartIoC.find_package_beans(:utils, dir_path)
 
-    @container = SmartIoC::Container.get_instance
+    @container = SmartIoC.container
+  end
+
+  it 'loads all beans' do
+    SmartIoC.load_all_beans
   end
 
   it 'sets beans' do
@@ -28,8 +32,8 @@ describe SmartIoC do
   end
 
   it 'sets beans with extra package context' do
-    SmartIoC::Container.get_instance.set_extra_context_for_package(:admins, :test)
-    SmartIoC::Container.get_instance.force_clear_scopes
+    SmartIoC.set_extra_context_for_package(:admins, :test)
+    SmartIoC.force_clear_scopes
 
     users_creator = @container.get_bean(:users_creator)
     users_creator.create(1, 'test@test.com')

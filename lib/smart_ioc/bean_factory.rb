@@ -1,5 +1,8 @@
 # Instantiates beans according to their scopes
 class SmartIoC::BeanFactory
+  include SmartIoC::Errors
+  include SmartIoC::Args
+
   def initialize(bean_definitions_storage, extra_package_contexts)
     @bean_definitions_storage = bean_definitions_storage
     @extra_package_contexts   = extra_package_contexts
@@ -25,37 +28,64 @@ class SmartIoC::BeanFactory
   # @raise [ArgumentError] if bean is not found
   # @raise [ArgumentError] if ambiguous bean definition was found
   def get_bean(bean_name, package: nil, context: nil)
-    context ||= if package
-      @extra_package_contexts.get_context(package)
-    else
-      @bean_file_loader.require_bean(bean_name)
-      bean_definition = autodetect_bean_definition(bean_name, package, nil)
-      bean_definition.context
-    end
-
-    if !context.is_a?(Symbol)
-      raise ArgumentError, 'context should be a Symbol'
-    end
+    check_arg(bean_name, :bean_name, Symbol)
+    check_arg(package, :package, Symbol) if package
+    check_arg(context, :context, Symbol) if context
 
     @bean_file_loader.require_bean(bean_name)
 
-    bds = @bean_definitions_storage.filter_by_with_drop_to_default_context(bean_name, package, context)
-    if bds.size > 1
-      raise ArgumentError, "Unable to create bean :#{bean_name}.\nSeveral definitions were found.\n#{bds.map(&:inspect).join("\n\n")}"
-    elsif bds.size == 0
-      raise ArgumentError, "Unable to find bean :#{bean_name} in any packages"
+    context         = autodetect_context(bean_name, package, context)
+    bean_definition = @bean_definitions_storage.find(bean_name, package, context)
+    scope           = get_scope(bean_definition)
+    bean            = scope.get_bean(bean_definition.klass)
+
+    if bean
+      update_dependencies(bean, bean_definition)
+      bean
+    else
+      dependency_cache = {}
+      beans_cache      = {}
+
+      autodetect_bean_definitions_for_dependencies(bean_definition, dependency_cache)
+      preload_beans(bean_definition, dependency_cache, beans_cache)
+      load_bean(bean_definition, dependency_cache, beans_cache)
     end
-
-    bean_definition = bds.first
-    dependency_cache = {}
-    beans_cache = {}
-
-    autodetect_bean_definitions_for_dependencies(bean_definition, dependency_cache)
-    preload_beans(bean_definition, dependency_cache, beans_cache)
-    load_bean(bean_definition, dependency_cache, beans_cache)
   end
 
   private
+
+  def update_dependencies(bean, bean_definition, updated_beans = {})
+    bean_definition.dependencies.each do |dependency|
+      bd = autodetect_bean_definition(
+        dependency.ref, dependency.package, bean_definition.package
+      )
+
+      scope    = get_scope(bean_definition)
+      dep_bean = updated_beans[bd] || scope.get_bean(bd.class)
+
+      if !dep_bean
+        dep_bean = get_bean(
+          bd.name, package: bd.package, context: bd.context
+        )
+
+        bean.instance_variable_set(:"@#{dependency.bean}", dep_bean)
+        updated_beans[bd] = dep_bean
+      else
+        update_dependencies(dep_bean, bd, updated_beans)
+      end
+    end
+  end
+
+  def autodetect_context(bean_name, package, context)
+    return context if context
+
+    if package
+      @extra_package_contexts.get_context(package)
+    else
+      bean_definition = autodetect_bean_definition(bean_name, package, nil)
+      bean_definition.context
+    end
+  end
 
   def autodetect_bean_definitions_for_dependencies(bean_definition, dependency_cache)
     bean_definition.dependencies.each do |dependency|
@@ -117,7 +147,13 @@ class SmartIoC::BeanFactory
   end
 
   def preload_beans(bean_definition, dependency_cache, beans_cache)
-    preload_bean_instance(bean_definition, beans_cache)
+    scope = get_scope(bean_definition)
+
+    if bean = scope.get_bean(bean_definition.klass)
+      beans_cache[bean_definition] = bean
+    else
+      preload_bean_instance(bean_definition, beans_cache)
+    end
 
     bean_definition.dependencies.each do |dependency|
       bd = dependency_cache[dependency]
@@ -176,6 +212,8 @@ class SmartIoC::BeanFactory
       bean = beans_cache[bean_definition]
       bean = bean.send(bean_definition.factory_method)
       beans_cache[bean_definition] = bean
+      scope = get_scope(bean_definition)
+      scope.save_bean(bean_definition.klass, bean)
     end
 
     inject_beans(bean_definition, dependency_cache, beans_cache)
@@ -209,18 +247,6 @@ class SmartIoC::BeanFactory
     end
 
     nil
-  end
-
-  def set_bean_dependencies(bean, bean_definition, parent_bean_package)
-    bean_definition.dependencies.each do |dependency|
-      context = if dependency.package
-        @extra_package_contexts.get_context(dependency.package)
-      end
-
-      dependent_bean = get_or_load_bean(dependency.ref, dependency.package, context, bean_definition.package)
-
-      bean.instance_variable_set(:"@#{dependency.bean}", dependent_bean)
-    end
   end
 
   def all_scopes

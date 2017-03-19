@@ -46,8 +46,10 @@ class SmartIoC::BeanLocations
 
     def load_all
       @data.each do |package, bean_locations|
-        bean_locations.each do |bean, path|
-          load(path)
+        bean_locations.each do |bean, paths|
+          paths.each do |path|
+            load(path)
+          end
         end
       end
     end

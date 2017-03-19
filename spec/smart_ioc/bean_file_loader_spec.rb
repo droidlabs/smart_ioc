@@ -10,7 +10,7 @@ describe SmartIoC::BeanFileLoader do
     dir_path = File.join(File.expand_path(File.dirname(__FILE__)), 'example/utils')
     SmartIoC.find_package_beans(:utils, dir_path)
 
-    @container = SmartIoC::Container.get_instance
+    @container = SmartIoC.container
   end
 
   it 'requires beans only once' do

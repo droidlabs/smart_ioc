@@ -1,4 +1,6 @@
 class SmartIoC::ExtraPackageContexts
+  include SmartIoC::Args
+
   def initialize
     @data = {}
   end
@@ -6,13 +8,8 @@ class SmartIoC::ExtraPackageContexts
   # @param package_name [Symbol]
   # @param context [Symbol]
   def set_context(package_name, context)
-    if !package_name.is_a?(Symbol)
-      raise ArgumentError, "package name should be a Symbol"
-    end
-
-    if !context.is_a?(Symbol)
-      raise ArgumentError, "context should be a Symbol"
-    end
+    check_arg(package_name, :package_name, Symbol)
+    check_arg(context, :context, Symbol)
 
     @data[package_name] = context
   end

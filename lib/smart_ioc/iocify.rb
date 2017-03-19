@@ -33,12 +33,12 @@ module SmartIoC::Iocify
     def bean(bean_name, scope: nil, package: nil, instance: true, factory_method: nil, context: nil)
       file_path = caller[0].split(':').first
 
-      bean_definition = SmartIoC::Container.get_instance.get_bean_definition_by_class(self)
+      bean_definition = SmartIoC.get_bean_definition_by_class(self)
 
       # skip if bean was registered
       return if bean_definition
 
-      bean_definition = SmartIoC::Container.get_instance.register_bean(
+      bean_definition = SmartIoC.register_bean(
         bean_name:      bean_name,
         klass:          self,
         scope:          scope,
@@ -72,7 +72,7 @@ module SmartIoC::Iocify
       bean_definition = SmartIoC::Container.get_instance.get_bean_definition_by_class(self)
 
       if bean_definition.nil?
-        raise ArgumentError, "current class is not registered as bean. Add bean :bean_name declaration"
+        raise ArgumentError, "#{self.to_s} is not registered as bean. Add `bean :bean_name` declaration"
       end
 
       bean_definition.add_dependency(

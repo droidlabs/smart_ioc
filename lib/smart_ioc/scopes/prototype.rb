@@ -1,4 +1,4 @@
-# Prototype scope instantiates new bean instance on each call
+# Prototype scope instantiates new bean instance on each SmartIoC.get_bean call
 class SmartIoC::Scopes::Prototype
   VALUE = :prototype
 

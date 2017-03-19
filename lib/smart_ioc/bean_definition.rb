@@ -1,4 +1,6 @@
 class SmartIoC::BeanDefinition
+  include SmartIoC::Args
+  
   attr_reader :name, :package, :path, :klass, :scope, :instance, :factory_method,
               :context, :dependencies
 
@@ -24,17 +26,9 @@ class SmartIoC::BeanDefinition
   end
 
   def add_dependency(bean_name:, ref: nil, package: nil)
-    if !bean_name.is_a?(Symbol)
-      raise ArgumentError, 'bean name should be a Symbol'
-    end
-
-    if ref && !ref.is_a?(Symbol)
-      raise ArgumentError, 'ref name should be a Symbol'
-    end
-
-    if package && !package.is_a?(Symbol)
-      raise ArgumentError, 'package/from should be a Symbol'
-    end
+    check_arg(bean_name, :bean_name, Symbol)
+    check_arg(ref, :ref, Symbol) if ref
+    check_arg(package, :package, Symbol) if package
 
     @dependencies << SmartIoC::BeanDependency.new(
       bean:    bean_name,
@@ -65,13 +59,5 @@ class SmartIoC::BeanDefinition
     str << "instance:       #{@instance}"
     str << "factory_method: #{@factory_method}"
     str.join("\n")
-  end
-
-  private
-
-  def not_nil(value, name)
-    if value.nil?
-      raise ArgumentError, ":#{name} should not be blank"
-    end
   end
 end

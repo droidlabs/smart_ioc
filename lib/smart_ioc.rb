@@ -1,6 +1,7 @@
 require 'smart_ioc/version'
 
 module SmartIoC
+  autoload :Args,                   'smart_ioc/args'
   autoload :BeanDefinition,         'smart_ioc/bean_definition'
   autoload :BeanDefinitionsStorage, 'smart_ioc/bean_definitions_storage'
   autoload :BeanDependency,         'smart_ioc/bean_dependency'
@@ -20,6 +21,10 @@ module SmartIoC
     autoload :Request,   'smart_ioc/scopes/request'
   end
 
+  module Errors
+    require 'smart_ioc/errors'
+  end
+
   class << self
     # @param package_name [String or Symbol] package name for bean definitions
     # @param dir [String] absolute path with bean definitions
@@ -32,13 +37,22 @@ module SmartIoC
 
     # Load all beans (usually required for production env)
     def load_all_beans
-      SmartIoC::BeanLocations.load_all
+      BeanLocations.load_all
     end
 
     # Full clear of data (mostly for tests)
     def clear
-      SmartIoC::BeanLocations.clear
-      SmartIoC::Container.clear
+      BeanLocations.clear
+      Container.clear
     end
+
+    def container
+      Container.get_instance
+    end
+
+    extend Forwardable
+
+    def_delegators :container, :register_bean, :get_bean_definition_by_class,
+                   :set_extra_context_for_package, :get_bean, :clear_scopes, :force_clear_scopes
   end
 end

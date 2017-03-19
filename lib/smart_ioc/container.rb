@@ -1,6 +1,8 @@
 module SmartIoC
   # SmartIoC::Container is a beans store used for dependency injection
   class Container
+    include SmartIoC::Args
+    
     DEFAULT_CONTEXT = :default
 
     class << self
@@ -29,32 +31,15 @@ module SmartIoC
     # @return [SmartIoC::BeanDefinition] bean definition
     def register_bean(bean_name:, klass:, context:, scope:, path:,
                       factory_method: nil, package_name: nil, instance: true)
-      if !bean_name.is_a?(Symbol)
-        raise ArgumentError, 'bean name should be a Symbol'
-      end
-
-      if !klass.is_a?(Class)
-        raise ArgumentError, 'bean class should be a Class'
-      end
-
-      if !path.is_a?(String)
-        raise ArgumentError, 'path should be a String'
-      end
-
-      if !(instance.is_a?(TrueClass) || instance.is_a?(FalseClass))
-        raise ArgumentError, 'instance should be true or false'
-      end
-
-      if (factory_method && !factory_method.is_a?(Symbol))
-        raise ArgumentError, 'factory method should be a Symbol'
-      end
-
       context ||= DEFAULT_CONTEXT
-
-      if !context.is_a?(Symbol)
-        raise ArgumentError, 'context should be a Symbol'
-      end
-
+      
+      check_arg(bean_name, :bean_name, Symbol)
+      check_arg(context, :context, Symbol)
+      check_arg(klass, :klass, Class)
+      check_arg(path, :path, String)
+      check_arg(factory_method, :factory_method, Symbol) if factory_method
+      check_arg_any(instance, :instance, [TrueClass, FalseClass])
+      
       scope ||= SmartIoC::Scopes::Singleton::VALUE
 
       allowed_scopes = [
