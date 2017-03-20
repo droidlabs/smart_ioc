@@ -1,4 +1,5 @@
 require 'smart_ioc/version'
+require 'forwardable'
 
 module SmartIoC
   autoload :Args,                   'smart_ioc/args'
