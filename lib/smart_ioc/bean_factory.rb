@@ -210,7 +210,7 @@ class SmartIoC::BeanFactory
     (zero_dep_bd_with_factory_methods + bd_with_factory_methods).each do |bean_definition|
       inject_beans(bean_definition, dependency_cache, beans_cache)
       bean = beans_cache[bean_definition]
-      bean = bean.send(bean_definition.factory_method)
+      bean = bean.send(bean_definition.factory_method) if bean.is_a?(bean_definition.klass)
       beans_cache[bean_definition] = bean
       scope = get_scope(bean_definition)
       scope.save_bean(bean_definition.klass, bean)
