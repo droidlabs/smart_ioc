@@ -1,6 +1,12 @@
 class SmartIoC::BeanFileLoader
   def initialize
     @loaded_locations = {}
+    @load_proc        = Proc.new { |location| load(location) }
+  end
+
+  def set_load_proc(&block)
+    raise ArgumentError, "block should be given" unless block_given?
+    @load_proc = block
   end
 
   # @param bean_name [Symbol] bean name
@@ -11,7 +17,7 @@ class SmartIoC::BeanFileLoader
     locations.each do |location|
       next if @loaded_locations.has_key?(location)
       @loaded_locations[location] = true
-      load location
+      @load_proc.call(location)
     end
 
     nil

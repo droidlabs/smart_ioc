@@ -3,6 +3,8 @@ class SmartIoC::BeanFactory
   include SmartIoC::Errors
   include SmartIoC::Args
 
+  attr_reader :bean_file_loader
+
   def initialize(bean_definitions_storage, extra_package_contexts)
     @bean_definitions_storage = bean_definitions_storage
     @extra_package_contexts   = extra_package_contexts

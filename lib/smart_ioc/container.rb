@@ -2,7 +2,7 @@ module SmartIoC
   # SmartIoC::Container is a beans store used for dependency injection
   class Container
     include SmartIoC::Args
-    
+
     DEFAULT_CONTEXT = :default
 
     class << self
@@ -32,14 +32,14 @@ module SmartIoC
     def register_bean(bean_name:, klass:, context:, scope:, path:,
                       factory_method: nil, package_name: nil, instance: true)
       context ||= DEFAULT_CONTEXT
-      
+
       check_arg(bean_name, :bean_name, Symbol)
       check_arg(context, :context, Symbol)
       check_arg(klass, :klass, Class)
       check_arg(path, :path, String)
       check_arg(factory_method, :factory_method, Symbol) if factory_method
       check_arg_any(instance, :instance, [TrueClass, FalseClass])
-      
+
       scope ||= SmartIoC::Scopes::Singleton::VALUE
 
       allowed_scopes = [
@@ -86,6 +86,16 @@ module SmartIoC
     # return [BeanDefinition]
     def get_bean_definition_by_class(klass)
       bean_definitions_storage.find_by_class(klass)
+    end
+
+    # Sets new load proc
+    # for those who use active support dependency loader
+    # one can use
+    # SmartIoC.set_load_proc do |location|
+    #    require_dependency(location)
+    # end
+    def set_load_proc(&proc)
+      bean_factory.bean_file_loader.set_load_proc(&proc)
     end
 
     # Sets extra context for specific package

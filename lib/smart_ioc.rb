@@ -54,6 +54,7 @@ module SmartIoC
     extend Forwardable
 
     def_delegators :container, :register_bean, :get_bean_definition_by_class,
-                   :set_extra_context_for_package, :get_bean, :clear_scopes, :force_clear_scopes
+                   :set_extra_context_for_package, :get_bean, :clear_scopes,
+                   :force_clear_scopes, :set_load_proc
   end
 end
