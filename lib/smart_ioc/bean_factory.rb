@@ -63,7 +63,7 @@ class SmartIoC::BeanFactory
       )
 
       scope    = get_scope(bean_definition)
-      dep_bean = updated_beans[bd] || scope.get_bean(bd.class)
+      dep_bean = updated_beans[bd] || scope.get_bean(bd.klass)
 
       if !dep_bean
         dep_bean = get_bean(
