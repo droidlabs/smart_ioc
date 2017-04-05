@@ -65,14 +65,14 @@ Existing bean details:
   # @bean_name [Symbol] bean name
   # @package [Symbol, nil] package name
   # @context [Symbol, nil] context
-  # @raises Errors::AmbiguousBeanDefinition if multiple bean definitions are found
+  # @raises AmbiguousBeanDefinition if multiple bean definitions are found
   def find(bean_name, package = nil, context = nil)
     bds = filter_by_with_drop_to_default_context(bean_name, package, context)
 
     if bds.size > 1
-      raise Errors::AmbiguousBeanDefinition.new(bean_name, bds)
+      raise AmbiguousBeanDefinition.new(bean_name, bds)
     elsif bds.size == 0
-      raise Errors::BeanNotFound.new(bean_name)
+      raise BeanNotFound.new(bean_name)
     end
 
     bds.first
