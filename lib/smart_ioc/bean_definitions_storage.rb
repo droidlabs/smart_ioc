@@ -26,10 +26,20 @@ Existing bean details:
     @collection.push(bean_definition)
   end
 
+  def delete_by_class(klass)
+    klass_str = klass.to_s
+    bean = @collection.detect {|bd| bd.klass.to_s == klass_str}
+
+    if bean
+      @collection.delete(bean)
+    end
+  end
+
   # @param klass [Class] bean class
   # @return bean definition [BeanDefinition] or nil
   def find_by_class(klass)
-    @collection.detect {|bd| bd.klass == klass}
+    klass_str = klass.to_s
+    @collection.detect {|bd| bd.klass.to_s == klass_str}
   end
 
   def filter_by(bean_name, package = nil, context = nil)
@@ -55,7 +65,7 @@ Existing bean details:
   # @bean_name [Symbol] bean name
   # @package [Symbol, nil] package name
   # @context [Symbol, nil] context
-  # @raises Errors::AmbiguousBeanDefinition if multiple bean definitions are found 
+  # @raises Errors::AmbiguousBeanDefinition if multiple bean definitions are found
   def find(bean_name, package = nil, context = nil)
     bds = filter_by_with_drop_to_default_context(bean_name, package, context)
 

@@ -23,6 +23,14 @@ module SmartIoC
       raise ArgumentError, "SmartIoC::Container should not be allocated. Use SmartIoC::Container.get_instance instead"
     end
 
+    # @param klass [Class] bean class name
+    # @return nil
+    def unregister_bean(klass)
+      bean_definitions_storage.delete_by_class(klass)
+      clear_scopes
+      nil
+    end
+
     # @param bean_name [Symbol] bean name
     # @param klass [Class] bean class name
     # @param path [String] bean file absolute path
