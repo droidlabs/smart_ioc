@@ -98,4 +98,64 @@ describe SmartIoC::BeanFactory do
     expect(prototype_bean1_object_id).not_to eq(prototype_bean2_object_id)
     expect(second_singleton_bean1_object_id).to eq(second_singleton_bean2_object_id)
   end
+
+  describe 'prototype scope' do
+    before :all do
+      class PrototypeBean
+        include SmartIoC::Iocify
+        bean :prototype_bean, scope: :prototype, package: :prototype
+
+        inject :prototype_service1
+        inject :prototype_service2
+
+        attr_reader :prototype_service1, :prototype_service2
+      end
+
+      class PrototypeService1
+        include SmartIoC::Iocify
+        bean :prototype_service1, scope: :prototype, package: :prototype
+
+        inject :prototype_repo
+        inject :singleton_repo
+
+        attr_reader :prototype_repo, :singleton_repo
+      end
+
+      class PrototypeService2
+        include SmartIoC::Iocify
+        bean :prototype_service2, scope: :prototype, package: :prototype
+
+        inject :prototype_repo
+        inject :singleton_repo
+
+        attr_reader :prototype_repo, :singleton_repo
+      end
+
+      class PrototypeRepo
+        include SmartIoC::Iocify
+        bean :prototype_repo, scope: :prototype, package: :prototype
+      end
+
+      class SingletonRepo
+        include SmartIoC::Iocify
+        bean :singleton_repo, scope: :singleton, package: :prototype
+      end
+    end
+
+    it 'injects prototype beans with different object id' do
+      prototype_bean = SmartIoC.get_bean(:prototype_bean)
+      repo1_object_id = prototype_bean.prototype_service1.prototype_repo.object_id
+      repo2_object_id = prototype_bean.prototype_service2.prototype_repo.object_id
+
+      expect(repo1_object_id).not_to eq(repo2_object_id)
+    end
+
+    it 'injects singleton beans with same object id' do
+      prototype_bean = SmartIoC.get_bean(:prototype_bean)
+      repo1_object_id = prototype_bean.prototype_service1.singleton_repo.object_id
+      repo2_object_id = prototype_bean.prototype_service2.singleton_repo.object_id
+
+      expect(repo1_object_id).to eq(repo2_object_id)
+    end
+  end
 end

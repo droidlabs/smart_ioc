@@ -1,6 +1,6 @@
 class SmartIoC::BeanDefinition
   include SmartIoC::Args
-  
+
   attr_reader :name, :package, :path, :klass, :scope, :instance, :factory_method,
               :context, :dependencies
 

@@ -17,6 +17,7 @@ module SmartIoC
   autoload :Scopes,                 'smart_ioc/scopes'
 
   module Scopes
+    autoload :Bean,      'smart_ioc/scopes/bean'
     autoload :Prototype, 'smart_ioc/scopes/prototype'
     autoload :Singleton, 'smart_ioc/scopes/singleton'
     autoload :Request,   'smart_ioc/scopes/request'
