@@ -54,8 +54,8 @@ module SmartIoC
     [:register_bean, :get_bean_definition_by_class,
      :set_extra_context_for_package, :get_bean, :clear_scopes,
      :force_clear_scopes, :set_load_proc].each do |name|
-      define_method name do |*args|
-        container.send(name, *args)
+      define_method name do |*args, &block|
+        container.send(name, *args, &block)
       end
    end
   end
