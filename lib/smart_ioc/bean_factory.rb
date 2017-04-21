@@ -66,6 +66,36 @@ class SmartIoC::BeanFactory
     end
   end
 
+  def load_bean(bean_definition, beans_cache)
+    bd_opts    = beans_cache[bean_definition]
+    scope_bean = bd_opts[:scope_bean]
+
+    bean_definition.dependencies.each do |dependency|
+      bd             = dependency.bean_definition
+      dep_db_opts    = bd_opts[:dependencies][dependency.bean_definition]
+      dep_scope_bean = dep_db_opts[:scope_bean]
+      dep_bean       = load_bean(bd, bd_opts[:dependencies])
+
+      scope_bean.bean.instance_variable_set(:"@#{dependency.bean}", dep_bean)
+    end
+
+    if !scope_bean.loaded
+      scope_bean.set_bean(scope_bean.bean.send(bean_definition.factory_method), true)
+    end
+
+    scope_bean.bean
+  end
+
+  def inject_beans(bean_definition, beans_cache)
+    bean = beans_cache[:scope_bean].bean
+    bean_definition.dependencies.each do |dependency|
+      bd = dependency.bean_definition
+      dep_bean = beans_cache[:dependencies][bd][:scope_bean].bean
+      bean.instance_variable_set(:"@#{dependency.bean}", dep_bean)
+      inject_beans(bd, beans_cache[:dependencies][bd])
+    end
+  end
+
   def init_bean_definition_cache(bean_definition)
     {
       bean_definition => {
@@ -221,71 +251,6 @@ class SmartIoC::BeanFactory
 
     if !scope_bean.loaded
       scope_bean.set_bean(scope_bean.bean.send(bean_definition.factory_method), true)
-    end
-  end
-
-  def init_zero_dep_factory_beans(beans_cache)
-    beans_cache.each do |bean_definition, bd_opts|
-      if bean_definition.has_factory_method?
-        has_factory_dependencies = !!bean_definition.dependencies.detect {|dep| dep.bean_definition.has_factory_method?}
-
-        if bean_definition.dependencies.size == 0 || !has_factory_dependencies
-          init_factory_bean(bean_definition, bd_opts)
-        end
-      end
-      init_zero_dep_factory_beans(bd_opts[:dependencies]) if !bd_opts[:dependencies].empty?
-    end
-  end
-
-  def collect_dependent_factory_beans(beans_cache, collection)
-    beans_cache.each do |bean_definition, bd_opts|
-      if bean_definition.has_factory_method? && bean_definition.dependencies.size > 0
-        collection << bean_definition
-      end
-      collect_dependent_factory_beans(bd_opts[:dependencies], collection)
-    end
-
-    collection
-  end
-
-  def init_dependent_factory_beans(beans_cache)
-    dependent_factory_beans = collect_dependent_factory_beans(beans_cache, [])
-
-    dependent_factory_beans.each do |bean_definition|
-      cross_refference_bd = get_cross_refference(dependent_factory_beans, bean_definition)
-
-      if cross_refference_bd
-        has_factory_dependencies = !!cross_refference_bd.dependencies.detect {|dep| dep.bean_definition.has_factory_method?}
-        
-        if has_factory_dependencies
-          raise ArgumentError, "Factory method beans should not cross refference each other. Bean :#{bean_definition.name} cross refferences bean :#{cross_refference_bd.name}."
-        end
-      end
-    end
-
-    beans_cache.each do |bean_definition, bd_opts|
-      if bean_definition.has_factory_method? && bean_definition.dependencies.size > 0
-        inject_beans(bean_definition, bd_opts)
-        init_factory_bean(bean_definition, bd_opts)
-      end
-      init_dependent_factory_beans(bd_opts[:dependencies])
-    end
-  end
-
-  def load_bean(bean_definition, beans_cache)
-    init_zero_dep_factory_beans(beans_cache)
-    init_dependent_factory_beans(beans_cache)
-    inject_beans(bean_definition, beans_cache[bean_definition])
-    beans_cache[bean_definition][:scope_bean].bean
-  end
-
-  def inject_beans(bean_definition, beans_cache)
-    bean = beans_cache[:scope_bean].bean
-    bean_definition.dependencies.each do |dependency|
-      bd = dependency.bean_definition
-      dep_bean = beans_cache[:dependencies][bd][:scope_bean].bean
-      bean.instance_variable_set(:"@#{dependency.bean}", dep_bean)
-      inject_beans(bd, beans_cache[:dependencies][bd])
     end
   end
 

@@ -54,6 +54,12 @@ describe 'Factory Method' do
         
         bean :singleton_bean, package: :cross_refference
       end
+
+      class OtherSingletonBean
+        include SmartIoC::Iocify
+
+        bean :other_singleton_bean, package: :cross_refference
+      end
       
       class FactoryConfig
         include SmartIoC::Iocify
@@ -61,6 +67,7 @@ describe 'Factory Method' do
         bean :factory_config, factory_method: :build, package: :cross_refference
 
         inject :singleton_bean
+        inject :other_singleton_bean
 
         class Config
           attr_reader :singleton_bean
@@ -81,23 +88,28 @@ describe 'Factory Method' do
         bean :factory_logger, factory_method: :build, package: :cross_refference
 
         inject :factory_config
+        inject :singleton_bean
 
         class Logger
-          attr_reader :factory_config
+          attr_reader :factory_config, :singleton_bean
 
-          def initialize(factory_config)
+          def initialize(factory_config, singleton_bean)
             @factory_config = factory_config
+            @singleton_bean = singleton_bean
           end
         end
         
         def build
-          Logger.new(factory_config)
+          Logger.new(factory_config, singleton_bean)
         end
       end
     end
 
     it 'creates factory_logger bean' do
-      expect(SmartIoC.get_bean(:factory_logger, package: :cross_refference)).to be_a(FactoryLogger::Logger)
+      logger = SmartIoC.get_bean(:factory_logger, package: :cross_refference)
+      expect(logger).to be_a(FactoryLogger::Logger)
+      expect(logger.factory_config).to be_a(FactoryConfig::Config)
+      expect(logger.factory_config.singleton_bean).to be_a(SingletonBean)
     end
 
     it 'creates factory_config bean' do
