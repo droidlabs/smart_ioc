@@ -50,7 +50,7 @@ class SmartIoC::BeanFactory
 
     history << bean_name
 
-    if scope_bean
+    if scope_bean && scope_bean.loaded
       update_dependencies(scope_bean.bean, bean_definition)
       scope_bean.bean
     else

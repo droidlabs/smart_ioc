@@ -101,7 +101,9 @@ describe 'Factory Method' do
     end
 
     it 'creates factory_config bean' do
-      expect(SmartIoC.get_bean(:factory_config, package: :cross_refference)).to be_a(FactoryConfig::Config)
+      config = SmartIoC.get_bean(:factory_config, package: :cross_refference)
+      expect(config).to be_a(FactoryConfig::Config)
+      expect(config.singleton_bean).to be_a(SingletonBean)
     end
   end
 end
