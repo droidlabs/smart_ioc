@@ -34,7 +34,7 @@ describe SmartIoC do
   it 'sets beans with extra package context' do
     SmartIoC.set_extra_context_for_package(:admins, :test)
     SmartIoC.force_clear_scopes
-
+    
     users_creator = @container.get_bean(:users_creator)
     users_creator.create(1, 'test@test.com')
 

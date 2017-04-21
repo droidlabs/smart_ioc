@@ -46,4 +46,46 @@ describe 'Factory Method' do
   it 'assigns bean with factory method' do
     expect(@other_service.test_config).to be_a(TestConfig::Config)
   end
+
+  context 'cross refference factory method beans' do
+    before :all do
+      class SingletonBean
+        include SmartIoC::Iocify
+        
+        bean :singleton_bean, package: :cross_refference
+      end
+      
+      class FactoryConfig
+        include SmartIoC::Iocify
+        
+        bean :factory_config, factory_method: :build, package: :cross_refference
+
+        inject :singleton_bean
+
+        def build
+          Object.new
+        end
+      end
+
+      class FactoryLogger
+        include SmartIoC::Iocify
+        
+        bean :factory_logger, factory_method: :build, package: :cross_refference
+
+        inject :factory_config
+
+        def build
+          Object.new
+        end
+      end
+    end
+
+    it 'creates factory_logger bean' do
+      expect(SmartIoC.get_bean(:factory_logger, package: :cross_refference)).to be_a(Object)
+    end
+
+    it 'creates factory_config bean' do
+      expect(SmartIoC.get_bean(:factory_config, package: :cross_refference)).to be_a(Object)
+    end
+  end
 end

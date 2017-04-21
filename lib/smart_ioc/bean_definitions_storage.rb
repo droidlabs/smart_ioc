@@ -5,6 +5,14 @@ class SmartIoC::BeanDefinitionsStorage
     @collection = []
   end
 
+  def clear_dependencies
+    @collection.each do |bd|
+      bd.dependencies.each do |dependency|
+        dependency.bean_definition = nil
+      end
+    end
+  end
+
   # @param bean_definition [BeanDefinition]
   def push(bean_definition)
     existing_bd = @collection.detect do |bd|

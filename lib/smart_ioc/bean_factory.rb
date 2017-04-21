@@ -58,12 +58,11 @@ class SmartIoC::BeanFactory
         raise LoadRecursion.new(bean_definition)
       end
 
-      dependency_cache = {}
-      beans_cache      = init_bean_definition_cache(bean_definition)
+      beans_cache = init_bean_definition_cache(bean_definition)
 
-      autodetect_bean_definitions_for_dependencies(bean_definition, dependency_cache)
-      preload_beans(bean_definition, dependency_cache, beans_cache[bean_definition])
-      load_bean(bean_definition, dependency_cache, beans_cache)
+      autodetect_bean_definitions_for_dependencies(bean_definition)
+      preload_beans(bean_definition, beans_cache[bean_definition])
+      load_bean(bean_definition, beans_cache)
     end
   end
 
@@ -115,19 +114,17 @@ class SmartIoC::BeanFactory
     end
   end
 
-  def autodetect_bean_definitions_for_dependencies(bean_definition, dependency_cache)
+  def autodetect_bean_definitions_for_dependencies(bean_definition)
     bean_definition.dependencies.each do |dependency|
-      next if dependency_cache.has_key?(dependency)
+      next if dependency.bean_definition
 
       @bean_file_loader.require_bean(dependency.ref)
 
-      bd = autodetect_bean_definition(
+      dependency.bean_definition = autodetect_bean_definition(
         dependency.ref, dependency.package, bean_definition.package
       )
 
-      dependency_cache[dependency] = bd
-
-      autodetect_bean_definitions_for_dependencies(bd, dependency_cache)
+      autodetect_bean_definitions_for_dependencies(dependency.bean_definition)
     end
   end
 
@@ -174,7 +171,7 @@ class SmartIoC::BeanFactory
     return smart_bds.first
   end
 
-  def preload_beans(bean_definition, dependency_cache, beans_cache)
+  def preload_beans(bean_definition, beans_cache)
     scope = get_scope(bean_definition)
 
     if scope_bean = scope.get_bean(bean_definition.klass)
@@ -184,13 +181,13 @@ class SmartIoC::BeanFactory
     end
 
     bean_definition.dependencies.each do |dependency|
-      bd = dependency_cache[dependency]
+      bd = dependency.bean_definition
 
       next if beans_cache[:dependencies].has_key?(bd)
 
       dep_bean_cache = init_bean_definition_cache(bd)
       beans_cache[:dependencies].merge!(dep_bean_cache)
-      preload_beans(bd, dependency_cache, dep_bean_cache[bd])
+      preload_beans(bd, dep_bean_cache[bd])
     end
   end
 
@@ -229,8 +226,12 @@ class SmartIoC::BeanFactory
 
   def init_zero_dep_factory_beans(beans_cache)
     beans_cache.each do |bean_definition, bd_opts|
-      if bean_definition.has_factory_method? && bean_definition.dependencies.size == 0
-        init_factory_bean(bean_definition, bd_opts)
+      if bean_definition.has_factory_method?
+        has_factory_dependencies = !!bean_definition.dependencies.detect {|dep| dep.bean_definition.has_factory_method?}
+
+        if bean_definition.dependencies.size == 0 || !has_factory_dependencies
+          init_factory_bean(bean_definition, bd_opts)
+        end
       end
       init_zero_dep_factory_beans(bd_opts[:dependencies]) if !bd_opts[:dependencies].empty?
     end
@@ -247,44 +248,50 @@ class SmartIoC::BeanFactory
     collection
   end
 
-  def init_dependent_factory_beans(beans_cache, dependency_cache)
+  def init_dependent_factory_beans(beans_cache)
     dependent_factory_beans = collect_dependent_factory_beans(beans_cache, [])
 
     dependent_factory_beans.each do |bean_definition|
-      if cross_refference_bd = get_cross_refference(dependent_factory_beans, bean_definition, dependency_cache)
-        raise ArgumentError, "Factory method beans should not cross refference each other. Bean :#{bean_definition.name} cross refferences bean :#{cross_refference_bd.name}."
+      cross_refference_bd = get_cross_refference(dependent_factory_beans, bean_definition)
+
+      if cross_refference_bd
+        has_factory_dependencies = !!cross_refference_bd.dependencies.detect {|dep| dep.bean_definition.has_factory_method?}
+        
+        if has_factory_dependencies
+          raise ArgumentError, "Factory method beans should not cross refference each other. Bean :#{bean_definition.name} cross refferences bean :#{cross_refference_bd.name}."
+        end
       end
     end
 
     beans_cache.each do |bean_definition, bd_opts|
       if bean_definition.has_factory_method? && bean_definition.dependencies.size > 0
-        inject_beans(bean_definition, dependency_cache, bd_opts)
+        inject_beans(bean_definition, bd_opts)
         init_factory_bean(bean_definition, bd_opts)
       end
-      init_dependent_factory_beans(bd_opts[:dependencies], dependency_cache)
+      init_dependent_factory_beans(bd_opts[:dependencies])
     end
   end
 
-  def load_bean(bean_definition, dependency_cache, beans_cache)
+  def load_bean(bean_definition, beans_cache)
     init_zero_dep_factory_beans(beans_cache)
-    init_dependent_factory_beans(beans_cache, dependency_cache)
-    inject_beans(bean_definition, dependency_cache, beans_cache[bean_definition])
+    init_dependent_factory_beans(beans_cache)
+    inject_beans(bean_definition, beans_cache[bean_definition])
     beans_cache[bean_definition][:scope_bean].bean
   end
 
-  def inject_beans(bean_definition, dependency_cache, beans_cache)
+  def inject_beans(bean_definition, beans_cache)
     bean = beans_cache[:scope_bean].bean
     bean_definition.dependencies.each do |dependency|
-      bd = dependency_cache[dependency]
+      bd = dependency.bean_definition
       dep_bean = beans_cache[:dependencies][bd][:scope_bean].bean
       bean.instance_variable_set(:"@#{dependency.bean}", dep_bean)
-      inject_beans(bd, dependency_cache, beans_cache[:dependencies][bd])
+      inject_beans(bd, beans_cache[:dependencies][bd])
     end
   end
 
-  def get_cross_refference(refer_bean_definitions, current_bean_definition, dependency_cache, seen_bean_definitions = [])
+  def get_cross_refference(refer_bean_definitions, current_bean_definition, seen_bean_definitions = [])
     current_bean_definition.dependencies.each do |dependency|
-      bd = dependency_cache[dependency]
+      bd = dependency.bean_definition
 
       next if seen_bean_definitions.include?(bd)
 
@@ -292,7 +299,7 @@ class SmartIoC::BeanFactory
         return bd
       end
 
-      if crbd = get_cross_refference(refer_bean_definitions, bd, dependency_cache, seen_bean_definitions + [bd])
+      if crbd = get_cross_refference(refer_bean_definitions, bd, seen_bean_definitions + [bd])
         return crbd
       end
     end

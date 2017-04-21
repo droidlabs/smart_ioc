@@ -111,6 +111,7 @@ module SmartIoC
     # @param context [Symbol] context (ex: :test)
     def set_extra_context_for_package(package_name, context)
       extra_package_contexts.set_context(package_name, context)
+      bean_definitions_storage.clear_dependencies
     end
 
     # @param bean_name [Symbol] bean name
