@@ -12,6 +12,7 @@ describe 'Factory Method' do
       attr_reader :test_config
     end
 
+
     class OtherService
       include SmartIoC::Iocify
 
