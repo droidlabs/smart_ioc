@@ -26,6 +26,8 @@ module SmartIoC
     require 'smart_ioc/errors'
   end
 
+  require 'smart_ioc/railtie' if defined?(Rails)
+
   class << self
     # @param package_name [String or Symbol] package name for bean definitions
     # @param dir [String] absolute path with bean definitions

@@ -20,6 +20,7 @@ class SmartIoC::BeanFactory
 
   def force_clear_scopes
     all_scopes.each(&:force_clear)
+    bean_file_loader.clear_locations
   end
 
   # Get bean from the container by it's name, package, context

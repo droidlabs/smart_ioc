@@ -128,6 +128,7 @@ module SmartIoC
 
     def force_clear_scopes
       bean_factory.force_clear_scopes
+      bean_factory.bean_file_loader.clear_locations
     end
 
     private

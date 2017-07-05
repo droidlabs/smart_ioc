@@ -22,4 +22,8 @@ class SmartIoC::BeanFileLoader
 
     nil
   end
+
+  def clear_locations
+    @loaded_locations = {}
+  end
 end

@@ -69,5 +69,12 @@ class SmartIoC::BeanLocations
 
       nil
     end
+
+    def get_all_bean_files
+      @data
+        .map { |_, bean_locations| bean_locations.values }
+        .flatten
+        .uniq
+    end
   end
 end
