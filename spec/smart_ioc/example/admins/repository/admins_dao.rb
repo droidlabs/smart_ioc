@@ -1,3 +1,5 @@
+$data ||= {}
+
 class AdminsDAO
   include SmartIoC::Iocify
 
@@ -5,16 +7,14 @@ class AdminsDAO
 
   inject :config
 
-  @data = {}
-
   class << self
     def insert(entity)
       config.app_name
-      @data[entity.id] = entity
+      $data[entity.id] = entity
     end
 
     def get(id)
-      @data[id]
+      $data[id]
     end
   end
 end
