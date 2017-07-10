@@ -11,6 +11,14 @@ class SmartIoC::Railtie < Rails::Railtie
     end
   end
 
+  initializer "smart_ioc.initialize" do
+    SmartIoC.set_load_proc do |location|
+      require_dependency(location)
+    end
+
+    Object.include SmartIoC::Iocify
+  end
+
   console do
     module Rails::ConsoleMethods
       alias :old_reload! :reload!
