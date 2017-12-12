@@ -11,7 +11,8 @@
 #   }
 # }
 class SmartIoC::BeanLocations
-  @data = {}
+  @data  = {}
+  @paths = {}
 
   class << self
     # @param package_name [Symbol] bean package name (ex: :repository)
@@ -23,10 +24,16 @@ class SmartIoC::BeanLocations
       @data[package_name] ||= {}
       package_beans = @data[package_name]
 
+      @paths[bean_path] = bean
+
       package_beans[bean] ||= []
       package_beans[bean].push(bean_path)
 
       nil
+    end
+
+    def get_bean_by_path(path)
+      @paths[path]
     end
 
     # @param bean [Symbol] bean name (ex: :users_repository)
