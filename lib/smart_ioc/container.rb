@@ -131,8 +131,14 @@ module SmartIoC
       bean_factory.bean_file_loader.clear_locations
     end
 
+    # @param bean_name [Symbol] bean name
+    # @return [Any]
+    def require_bean(bean_name)
+      bean_factory.bean_file_loader.require_bean(bean_name)
+    end
+    
     private
-
+    
     def bean_factory
       @bean_factory ||= SmartIoC::BeanFactory.new(bean_definitions_storage, extra_package_contexts)
     end

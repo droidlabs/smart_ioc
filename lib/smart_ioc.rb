@@ -40,7 +40,9 @@ module SmartIoC
 
     # Load all beans (usually required for production env)
     def load_all_beans
-      BeanLocations.load_all
+      BeanLocations.all_bean_names.each do |bean|
+        container.require_bean(bean)
+      end
     end
 
     # Full clear of data (mostly for tests)

@@ -32,6 +32,11 @@ class SmartIoC::BeanLocations
       nil
     end
 
+    # @return names of all found beans
+    def all_bean_names
+      @data.keys
+    end
+
     def get_bean_by_path(path)
       @paths[path]
     end
@@ -49,16 +54,6 @@ class SmartIoC::BeanLocations
       end
 
       locations
-    end
-
-    def load_all
-      @data.each do |package, bean_locations|
-        bean_locations.each do |bean, paths|
-          paths.each do |path|
-            load(path)
-          end
-        end
-      end
     end
 
     def clear
