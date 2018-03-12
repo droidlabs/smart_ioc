@@ -5,6 +5,5 @@ gemspec
 
 group :test do
   gem 'rspec'
-  gem 'byebug'
   gem 'simplecov'
 end

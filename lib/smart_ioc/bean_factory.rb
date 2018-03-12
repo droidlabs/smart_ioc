@@ -1,3 +1,5 @@
+require 'thread'
+
 # Instantiates beans according to their scopes
 class SmartIoC::BeanFactory
   include SmartIoC::Errors
@@ -12,6 +14,7 @@ class SmartIoC::BeanFactory
     @singleton_scope          = SmartIoC::Scopes::Singleton.new
     @prototype_scope          = SmartIoC::Scopes::Prototype.new
     @thread_scope             = SmartIoC::Scopes::Request.new
+    @semaphore                = Mutex.new
   end
 
   def clear_scopes
@@ -34,7 +37,9 @@ class SmartIoC::BeanFactory
     check_arg(package, :package, Symbol) if package
     check_arg(context, :context, Symbol) if context
 
-    get_or_build_bean(bean_name, package, context)
+    @semaphore.synchronize do
+      result = get_or_build_bean(bean_name, package, context)
+    end
   end
 
   private

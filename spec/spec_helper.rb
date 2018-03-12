@@ -9,12 +9,11 @@ end
 
 if ENV['CI']=='true'
   require 'codecov'
-  
+
   SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
 
 require 'smart_ioc'
-require 'byebug'
 
 RSpec.configure do |config|
 end
