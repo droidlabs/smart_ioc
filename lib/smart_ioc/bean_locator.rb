@@ -1,6 +1,6 @@
 class SmartIoC::BeanLocator
   include SmartIoC::Args
-  
+
   BEAN_PATTERN = /bean\s+(:[a-zA-z0-9\-\_]+)/
 
   # @param package_name [Symbol] package name for bean (ex: :repository)
@@ -10,21 +10,18 @@ class SmartIoC::BeanLocator
     check_arg(package_name, :package_name, Symbol)
 
     Dir.glob(File.join(dir, '**/*.rb')).each do |file_path|
-      source_str = File.read(file_path)
+      File.readlines(file_path).each do |line|
+        match_data = line.match(BEAN_PATTERN)
 
-      beans = find_package_beans(source_str)
-
-      beans.each do |bean_name|
-        SmartIoC::BeanLocations.add_bean(package_name, bean_name, file_path)
+        if match_data
+          SmartIoC::BeanLocations.add_bean(
+            package_name, match_data.captures.first.gsub(':', '').to_sym, file_path
+          )
+          break
+        end
       end
     end
+
     nil
-  end
-
-  private
-
-  def find_package_beans(source_str)
-    tokens = source_str.scan(BEAN_PATTERN)
-    tokens.flatten.uniq.map {|token| token.gsub(':', '').to_sym}
   end
 end
