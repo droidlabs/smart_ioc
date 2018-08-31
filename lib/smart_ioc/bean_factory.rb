@@ -103,6 +103,10 @@ class SmartIoC::BeanFactory
       scope_bean.set_bean(scope_bean.bean.send(bean_definition.factory_method), true)
     end
 
+    if bean_definition.after_init
+      scope_bean.bean.send(bean_definition.after_init)
+    end
+
     scope_bean.bean
   end
 

@@ -29,8 +29,9 @@ module SmartIoC::Iocify
     # @param factory_method [nil or Symbol] factory method to get bean
     # @param instance [Boolean] instance based bean or class-based
     # @param context [Symbol] set bean context (ex: :test)
+    # @param after_init [Symbol] name of bean method that will be called after bean initialization (ex: :test)
     # @return nil
-    def bean(bean_name, scope: nil, package: nil, instance: true, factory_method: nil, context: nil)
+    def bean(bean_name, scope: nil, package: nil, instance: true, factory_method: nil, context: nil, after_init: nil)
       file_path = caller[0].split(':').first
 
       bean_definition = SmartIoC.get_bean_definition_by_class(self)
@@ -55,7 +56,8 @@ module SmartIoC::Iocify
         package_name:   package,
         instance:       instance,
         factory_method: factory_method,
-        context:        context
+        context:        context,
+        after_init:     after_init,
       )
 
       if bean_definition.is_instance?

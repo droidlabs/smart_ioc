@@ -36,8 +36,9 @@ module SmartIoC
     # @param path [String] bean file absolute path
     # @param scope [Symbol] scope value
     # @param context [Symbol] bean context
+    # @param after_init [Symbol] name of bean method that will be called after bean initialization
     # @return [SmartIoC::BeanDefinition] bean definition
-    def register_bean(bean_name:, klass:, context:, scope:, path:,
+    def register_bean(bean_name:, klass:, context:, scope:, path:, after_init:,
                       factory_method: nil, package_name: nil, instance: true)
       context ||= DEFAULT_CONTEXT
 
@@ -81,7 +82,8 @@ module SmartIoC
         instance:       instance,
         factory_method: factory_method,
         context:        context,
-        scope:          scope
+        scope:          scope,
+        after_init:     after_init,
       )
 
       bean_definitions_storage.push(bean_definition)
@@ -136,9 +138,9 @@ module SmartIoC
     def require_bean(bean_name)
       bean_factory.bean_file_loader.require_bean(bean_name)
     end
-    
+
     private
-    
+
     def bean_factory
       @bean_factory ||= SmartIoC::BeanFactory.new(bean_definitions_storage, extra_package_contexts)
     end

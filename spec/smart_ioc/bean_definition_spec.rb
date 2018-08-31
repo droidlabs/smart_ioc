@@ -4,14 +4,15 @@ describe SmartIoC::BeanDefinition do
   describe "::inspect" do
     it {
       bd = SmartIoC::BeanDefinition.new(
-        name: :test_bean,
-        package: :test_package,
-        path: 'current_dir',
-        klass: Object,
-        scope: :singleton,
-        context: :default,
-        instance: false,
-        factory_method: nil
+        name:           :test_bean,
+        package:        :test_package,
+        path:           'current_dir',
+        klass:          Object,
+        scope:          :singleton,
+        context:        :default,
+        instance:       false,
+        factory_method: nil,
+        after_init:     nil,
       )
 
       str =

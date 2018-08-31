@@ -1,11 +1,13 @@
 class UsersDAO
   include SmartIoC::Iocify
 
-  bean :dao, instance: false
-
-  @data = {}
+  bean :dao, instance: false, after_init: :setup
 
   class << self
+    def setup
+      @data = {}
+    end
+
     def insert(entity)
       @data[entity.id] = entity
     end

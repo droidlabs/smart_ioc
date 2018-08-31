@@ -2,9 +2,9 @@ class SmartIoC::BeanDefinition
   include SmartIoC::Args
 
   attr_reader :name, :package, :path, :klass, :scope, :instance, :factory_method,
-              :context, :dependencies
+              :context, :dependencies, :after_init
 
-  def initialize(name:, package:, path:, klass:, scope:, context:, instance:, factory_method:)
+  def initialize(name:, package:, path:, klass:, scope:, context:, instance:, factory_method:, after_init:)
     not_nil(name, :name)
     not_nil(package, :package)
     not_nil(path, :path)
@@ -20,6 +20,7 @@ class SmartIoC::BeanDefinition
     @scope          = scope
     @instance       = instance
     @factory_method = factory_method
+    @after_init     = after_init
     @context        = context
 
     @dependencies = []
