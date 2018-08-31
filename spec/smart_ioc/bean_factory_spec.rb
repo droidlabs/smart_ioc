@@ -32,6 +32,15 @@ describe SmartIoC::BeanFactory do
     end
   end
 
+  it 'returns benchmark time to load bean' do
+    SmartIoC.benchmark_mode(true)
+
+    SmartIoC.set_extra_context_for_package(:bean_factory, :test)
+    SmartIoC.get_bean(:repo)
+
+    SmartIoC.benchmark_mode(false)
+  end
+
   it 'returns same instance for singleton scope' do
     SmartIoC.set_extra_context_for_package(:bean_factory, :test)
     instance1 = SmartIoC.get_bean(:repo)

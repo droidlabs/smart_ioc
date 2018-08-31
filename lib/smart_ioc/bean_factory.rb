@@ -37,9 +37,24 @@ class SmartIoC::BeanFactory
     check_arg(package, :package, Symbol) if package
     check_arg(context, :context, Symbol) if context
 
-    @semaphore.synchronize do
-      result = get_or_build_bean(bean_name, package, context)
+    result = nil
+
+    if SmartIoC.is_benchmark_mode
+      time = Benchmark.realtime do
+        result = @semaphore.synchronize do
+          get_or_build_bean(bean_name, package, context)
+        end
+      end
+
+      time *= 1000
+      puts "Bean :#{bean_name} loaded. Time taken: #{"%.2f ms" % time}"
+    else
+      result = @semaphore.synchronize do
+        get_or_build_bean(bean_name, package, context)
+      end
     end
+
+    result
   end
 
   private
