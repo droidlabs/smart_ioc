@@ -1,4 +1,5 @@
 require 'smart_ioc/version'
+require 'benchmark'
 
 module SmartIoC
   autoload :Args,                   'smart_ioc/args'
@@ -29,13 +30,30 @@ module SmartIoC
   require 'smart_ioc/railtie' if defined?(Rails)
 
   class << self
+    def is_benchmark_mode
+      @benchmark_mode
+    end
+
     # @param package_name [String or Symbol] package name for bean definitions
     # @param dir [String] absolute path with bean definitions
     # @return nil
     def find_package_beans(package_name, dir)
-      bean_locator = SmartIoC::BeanLocator.new
-      bean_locator.locate_beans(package_name.to_sym, dir)
+      time = Benchmark.realtime do
+        bean_locator = SmartIoC::BeanLocator.new
+        bean_locator.locate_beans(package_name.to_sym, dir)
+      end
+
+      time *= 1000
+
+      if is_benchmark_mode
+        puts "Search finished for '#{package_name}'. Time taken: #{"%.2f ms" % time}"
+      end
+
       nil
+    end
+
+    def benchmark_mode(flag)
+      @benchmark_mode = !!flag
     end
 
     # Load all beans (usually required for production env)
