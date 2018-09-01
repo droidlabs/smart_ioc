@@ -9,7 +9,7 @@ describe 'Factory Method' do
 
       inject :test_config
 
-      attr_reader :test_config
+      public :test_config
     end
 
 
@@ -20,7 +20,7 @@ describe 'Factory Method' do
 
       inject :test_config
 
-      attr_reader :test_config
+      public :test_config
     end
 
     class TestConfig
@@ -52,7 +52,7 @@ describe 'Factory Method' do
     before :all do
       class SingletonBean
         include SmartIoC::Iocify
-        
+
         bean :singleton_bean, package: :cross_refference
       end
 
@@ -61,10 +61,10 @@ describe 'Factory Method' do
 
         bean :other_singleton_bean, package: :cross_refference
       end
-      
+
       class FactoryConfig
         include SmartIoC::Iocify
-        
+
         bean :factory_config, factory_method: :build, package: :cross_refference
 
         inject :singleton_bean
@@ -85,7 +85,7 @@ describe 'Factory Method' do
 
       class FactoryLogger
         include SmartIoC::Iocify
-        
+
         bean :factory_logger, factory_method: :build, package: :cross_refference
 
         inject :factory_config
@@ -99,7 +99,7 @@ describe 'Factory Method' do
             @singleton_bean = singleton_bean
           end
         end
-        
+
         def build
           Logger.new(factory_config, singleton_bean)
         end

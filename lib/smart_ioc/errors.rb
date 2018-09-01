@@ -5,16 +5,6 @@ module SmartIoC::Errors
     end
   end
 
-  class LoadRecursion < StandardError
-    def initialize(bean_definition)
-      super(%Q(
-        Unable to create bean :#{bean_definitions.name}.
-        Recursion found during bean load.
-        #{bean_definition.inspect}
-      ))
-    end
-  end
-
   class AmbiguousBeanDefinition < StandardError
     def initialize(bean_name, bean_definitions)
       super(%Q(

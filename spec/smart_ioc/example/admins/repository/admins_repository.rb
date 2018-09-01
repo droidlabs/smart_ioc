@@ -3,7 +3,10 @@ class AdminsRepository
 
   bean :repository
 
-  inject :dao
+  inject :dao, from: :admins
+  inject :users_creator
+
+  public :users_creator
 
   def put(user)
     dao.insert(user)

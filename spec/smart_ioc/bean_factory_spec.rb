@@ -76,7 +76,7 @@ describe SmartIoC::BeanFactory do
 
       inject :prototype_bean
 
-      attr_reader :prototype_bean
+      public :prototype_bean
     end
 
     class SecondSingletonBean
@@ -90,7 +90,7 @@ describe SmartIoC::BeanFactory do
 
       inject :second_singleton_bean
 
-      attr_reader :second_singleton_bean
+      public :second_singleton_bean
     end
 
     bean1 = SmartIoC.get_bean(:singleton_bean, package: :test)
@@ -104,7 +104,7 @@ describe SmartIoC::BeanFactory do
     second_singleton_bean2_object_id = bean2.prototype_bean.second_singleton_bean.object_id
 
     expect(bean1_object_id).to eq(bean2_object_id)
-    expect(prototype_bean1_object_id).not_to eq(prototype_bean2_object_id)
+    expect(prototype_bean1_object_id).to eq(prototype_bean2_object_id)
     expect(second_singleton_bean1_object_id).to eq(second_singleton_bean2_object_id)
   end
 
@@ -117,7 +117,7 @@ describe SmartIoC::BeanFactory do
         inject :prototype_service1
         inject :prototype_service2
 
-        attr_reader :prototype_service1, :prototype_service2
+        public :prototype_service1, :prototype_service2
       end
 
       class PrototypeService1
@@ -127,7 +127,7 @@ describe SmartIoC::BeanFactory do
         inject :prototype_repo
         inject :singleton_repo
 
-        attr_reader :prototype_repo, :singleton_repo
+        public :prototype_repo, :singleton_repo
       end
 
       class PrototypeService2
@@ -137,16 +137,18 @@ describe SmartIoC::BeanFactory do
         inject :prototype_repo
         inject :singleton_repo
 
-        attr_reader :prototype_repo, :singleton_repo
+        public :prototype_repo, :singleton_repo
       end
 
       class PrototypeRepo
         include SmartIoC::Iocify
+
         bean :prototype_repo, scope: :prototype, package: :prototype
       end
 
       class SingletonRepo
         include SmartIoC::Iocify
+
         bean :singleton_repo, scope: :singleton, package: :prototype
       end
     end

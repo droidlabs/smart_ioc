@@ -50,6 +50,10 @@ class SmartIoC::BeanDefinition
     bean_definition.klass == @klass
   end
 
+  def singleton?
+    SmartIoC::Scopes::Singleton::VALUE == @scope
+  end
+
   def inspect
     str = []
     str << "class:          #{@klass}"

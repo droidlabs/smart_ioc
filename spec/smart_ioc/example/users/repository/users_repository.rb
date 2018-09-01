@@ -6,6 +6,8 @@ class UsersRepository
   inject :users_creator # just for testing purposes (circular load check)
   inject :dao
 
+  public :users_creator
+
   def put(user)
     dao.insert(user)
   end

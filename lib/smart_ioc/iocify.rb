@@ -92,16 +92,21 @@ module SmartIoC::Iocify
         package:   from
       )
 
+      bean_method = Proc.new do
+        bean = instance_variable_get(:"@#{bean_name}")
+        return bean if bean
+        instance_variable_set(:"@#{bean_name}", SmartIoC::Container.get_bean(ref || bean_name, from))
+      end
+
       if bean_definition.is_instance?
-        class_eval %Q(
-          private
-            attr_reader :#{bean_name}
-        )
+        define_method bean_name, &bean_method
+        private bean_name
       else
+        define_singleton_method bean_name, &bean_method
+
         class_eval %Q(
           class << self
-            private
-              attr_reader :#{bean_name}
+            private :#{bean_name}
           end
         )
       end
