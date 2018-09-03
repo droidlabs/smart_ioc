@@ -1,7 +1,7 @@
 module SmartIoC::Args
   def check_arg(value, name, klass)
     if !value.is_a?(klass)
-      raise ArgumentError, ":#{name} should be a #{klass}"
+      raise ArgumentError, ":#{name} should be a #{klass}. Got #{value.class}: #{value.inspect}"
     end
   end
 

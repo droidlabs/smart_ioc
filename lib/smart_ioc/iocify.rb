@@ -95,7 +95,17 @@ module SmartIoC::Iocify
       bean_method = Proc.new do
         bean = instance_variable_get(:"@#{bean_name}")
         return bean if bean
-        instance_variable_set(:"@#{bean_name}", SmartIoC::Container.get_bean(ref || bean_name, from))
+
+        klass = self.is_a?(Class) ? self : self.class
+        bean_definition = SmartIoC::Container.get_instance.get_bean_definition_by_class(klass)
+
+        bean = SmartIoC::Container.get_instance.get_bean(
+          ref || bean_name,
+          package: from,
+          parent_bean_definition: bean_definition
+        )
+
+        instance_variable_set(:"@#{bean_name}", bean)
       end
 
       if bean_definition.is_instance?

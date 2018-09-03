@@ -73,9 +73,20 @@ Existing bean details:
   # @bean_name [Symbol] bean name
   # @package [Symbol, nil] package name
   # @context [Symbol, nil] context
+  # @package [Symbol, nil] parent_package name of parent package
   # @raises AmbiguousBeanDefinition if multiple bean definitions are found
-  def find(bean_name, package = nil, context = nil)
+  def find(bean_name, package = nil, context = nil, parent_package = nil)
     bds = filter_by_with_drop_to_default_context(bean_name, package, context)
+
+    if bds.size > 1 && parent_package
+      bean_definition = bds.detect do |bd|
+        bd.package == parent_package
+      end
+
+      if bean_definition
+        bds = [bean_definition]
+      end
+    end
 
     if bds.size > 1
       raise AmbiguousBeanDefinition.new(bean_name, bds)

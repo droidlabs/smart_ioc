@@ -13,10 +13,6 @@ module SmartIoC
       def clear
         @container = nil
       end
-
-      def get_bean(bean_name, package = nil, context = nil)
-        get_instance.get_bean(bean_name, package: package, context: context)
-      end
     end
 
     def initialize
@@ -118,10 +114,16 @@ module SmartIoC
 
     # @param bean_name [Symbol] bean name
     # @param optional package [Symbol] package name
+    # @param optional parent_bean_definition [SmartIoc::BeanDefinition] bean definition of parent bean
     # @param optional context [Symbol] package context
     # @return bean instance from container
-    def get_bean(bean_name, package: nil, context: nil)
-      bean_factory.get_bean(bean_name, package: package, context: context)
+    def get_bean(bean_name, package: nil, context: nil, parent_bean_definition: nil)
+      bean_factory.get_bean(
+        bean_name,
+        package: package,
+        parent_bean_definition: parent_bean_definition,
+        context: context,
+      )
     end
 
     def clear_scopes

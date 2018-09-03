@@ -3,7 +3,7 @@ class AdminsRepository
 
   bean :repository
 
-  inject :dao, from: :admins
+  inject :dao
   inject :users_creator
 
   public :users_creator
