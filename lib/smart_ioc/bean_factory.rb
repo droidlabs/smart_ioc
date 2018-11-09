@@ -83,7 +83,7 @@ class SmartIoC::BeanFactory
       @extra_package_contexts.get_context(package)
     else
       bean_definition = autodetect_bean_definition(bean_name, package, parent_bean_package)
-      bean_definition.context
+      @extra_package_contexts.get_context(bean_definition.package)
     end
   end
 
