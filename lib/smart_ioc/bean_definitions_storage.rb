@@ -46,8 +46,16 @@ Existing bean details:
   # @param klass [Class] bean class
   # @return bean definition [BeanDefinition] or nil
   def find_by_class(klass)
-    klass_str = klass.to_s
-    @collection.detect {|bd| bd.klass.to_s == klass_str}
+    @collection.detect {|bd| bd.klass == klass}
+  end
+
+  # Returns bean definition for specific class
+  # @param bean_name [Symbol]
+  # @param package [Symbol]
+  # @param context [Symbol]
+  # @return bean definition [BeanDefinition] or nil
+  def find_bean(bean_name, package, context)
+    @collection.detect {|bd| bd.name == bean_name && bd.package == package && bd.context == context}
   end
 
   def filter_by(bean_name, package = nil, context = nil)

@@ -73,7 +73,7 @@ module SmartIoC
       Container.get_instance
     end
 
-    [:register_bean, :get_bean_definition_by_class,
+    [:register_bean, :get_bean_definition,
      :set_extra_context_for_package, :get_bean, :clear_scopes,
      :force_clear_scopes, :set_load_proc].each do |name|
       define_method name do |*args, &block|
@@ -82,3 +82,5 @@ module SmartIoC
    end
   end
 end
+
+require 'smart_ioc/bean'

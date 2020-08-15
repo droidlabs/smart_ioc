@@ -57,8 +57,6 @@ module SmartIoC
         raise ArgumentError, "bean scope should be one of #{allowed_scopes.inspect}"
       end
 
-      package_name ||= SmartIoC::BeanLocations.get_bean_package(path)
-
       if !package_name
         raise ArgumentError, %Q(
           Package name should be given for bean :#{bean_name}.
@@ -88,10 +86,12 @@ module SmartIoC
     end
 
     # Returns bean definition for specific class
-    # @param klass [Class] class name
+    # @param bean_name [Symbol]
+    # @param package [Symbol]
+    # @param context [Symbol]
     # return [BeanDefinition]
-    def get_bean_definition_by_class(klass)
-      bean_definitions_storage.find_by_class(klass)
+    def get_bean_definition(bean_name, package, context)
+      bean_definitions_storage.find_bean(bean_name, package, context)
     end
 
     # Sets new load proc
@@ -117,12 +117,13 @@ module SmartIoC
     # @param optional parent_bean_definition [SmartIoc::BeanDefinition] bean definition of parent bean
     # @param optional context [Symbol] package context
     # @return bean instance from container
-    def get_bean(bean_name, package: nil, context: nil, parent_bean_definition: nil)
+    def get_bean(bean_name, package: nil, context: nil, parent_bean_definition: nil, parent_bean_name: nil)
       bean_factory.get_bean(
         bean_name,
         package: package,
         parent_bean_definition: parent_bean_definition,
         context: context,
+        parent_bean_name: parent_bean_name,
       )
     end
 

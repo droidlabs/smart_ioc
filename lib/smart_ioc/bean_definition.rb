@@ -47,7 +47,7 @@ class SmartIoC::BeanDefinition
   end
 
   def ==(bean_definition)
-    bean_definition.klass == @klass
+    bean_definition.name == @name && bean_definition.package == @package && bean_definition.context == @context
   end
 
   def singleton?
@@ -56,7 +56,6 @@ class SmartIoC::BeanDefinition
 
   def inspect
     str = []
-    str << "class:          #{@klass}"
     str << "name:           :#{@name}"
     str << "package:        :#{@package}"
     str << "context:        :#{@context}"

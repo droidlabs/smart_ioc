@@ -31,7 +31,7 @@ class SmartIoC::BeanFactory
   # @return bean instance
   # @raise [ArgumentError] if bean is not found
   # @raise [ArgumentError] if ambiguous bean definition was found
-  def get_bean(bean_name, package: nil, parent_bean_definition: nil, context: nil)
+  def get_bean(bean_name, package: nil, parent_bean_definition: nil, context: nil, parent_bean_name: nil)
     check_arg(bean_name, :bean_name, Symbol)
     check_arg(package, :package, Symbol) if package
     check_arg(parent_bean_definition, :parent_bean_definition, SmartIoC::BeanDefinition) if parent_bean_definition
@@ -40,7 +40,7 @@ class SmartIoC::BeanFactory
     @bean_file_loader.require_bean(bean_name)
 
     parent_package_name = parent_bean_definition ? parent_bean_definition.package : nil
-    context = autodetect_context(bean_name, package, parent_package_name, context)
+    context = autodetect_context(bean_name, package, parent_package_name, context, parent_bean_name)
     bean_definition = @bean_definitions_storage.find(bean_name, package, context, parent_package_name)
     scope = get_scope(bean_definition)
     bean = scope.get_bean(bean_definition.klass)
@@ -76,18 +76,18 @@ class SmartIoC::BeanFactory
     bean
   end
 
-  def autodetect_context(bean_name, package, parent_bean_package, context)
+  def autodetect_context(bean_name, package, parent_bean_package, context, parent_bean_name)
     return context if context
 
     if package
       @extra_package_contexts.get_context(package)
     else
-      bean_definition = autodetect_bean_definition(bean_name, package, parent_bean_package)
+      bean_definition = autodetect_bean_definition(bean_name, package, parent_bean_package, parent_bean_name)
       @extra_package_contexts.get_context(bean_definition.package)
     end
   end
 
-  def autodetect_bean_definition(bean, package, parent_bean_package)
+  def autodetect_bean_definition(bean, package, parent_bean_package, parent_bean_name)
     if package
       bean_context = @extra_package_contexts.get_context(package)
       bds = @bean_definitions_storage.filter_by_with_drop_to_default_context(bean, package, bean_context)
@@ -121,7 +121,7 @@ class SmartIoC::BeanFactory
 
     if smart_bds.size > 1
       raise ArgumentError.new(
-%Q(Unable to autodetect bean :#{bean}.
+%Q(Unable to autodetect bean :#{bean}#{parent_bean_name ? " for bean :#{parent_bean_name}" : ''}.
 Several definitions were found:\n
 #{smart_bds.map(&:inspect).join("\n\n")}.
 Set package directly for injected dependency
