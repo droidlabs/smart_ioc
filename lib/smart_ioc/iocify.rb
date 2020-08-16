@@ -64,8 +64,8 @@ module SmartIoC::Iocify
     # @param context [Symbol] set bean context (ex: :test)
     # @param after_init [Symbol] name of bean method that will be called after bean initialization (ex: :test)
     # @return nil
-    def bean(bean_name, scope: nil, package: nil, instance: true, factory_method: nil, context: nil, after_init: nil)
-      file_path = caller[0].split(':').first
+    def bean(bean_name, scope: nil, package: nil, instance: true, factory_method: nil, context: nil, after_init: nil, file_path: nil)
+      file_path ||= caller[0].split(':').first
       package ||= SmartIoC::BeanLocations.get_bean_package(file_path)
       context ||= SmartIoC::Container::DEFAULT_CONTEXT
       bean_definition = SmartIoC.get_bean_definition(bean_name, package, context)

@@ -21,12 +21,14 @@ class SmartIoC::BeanDefinitionsStorage
 
     if existing_bd
       error_msg =
-%Q(Not able to add bean to definitions storage.
+%Q(Unable to add bean to definitions storage.
 Bean definition already exists.
+
 New bean details:
-  #{bean_definition.inspect}
+#{bean_definition.inspect}
+
 Existing bean details:
-  #{existing_bd.inspect})
+#{existing_bd.inspect})
 
       raise ArgumentError, error_msg
     end
