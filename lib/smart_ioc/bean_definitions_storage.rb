@@ -20,17 +20,18 @@ class SmartIoC::BeanDefinitionsStorage
     end
 
     if existing_bd
-      error_msg =
-%Q(Unable to add bean to definitions storage.
-Bean definition already exists.
+      @collection.reject! { |bd| bd == existing_bd }
 
-New bean details:
-#{bean_definition.inspect}
+      message = <<~EOF
+        \nReplacing bean definition...
+          - New bean details:
+        #{bean_definition.inspect}
+          - Existing bean details:
+        #{existing_bd.inspect})
 
-Existing bean details:
-#{existing_bd.inspect})
+      EOF
 
-      raise ArgumentError, error_msg
+      puts message
     end
 
     @collection.push(bean_definition)
