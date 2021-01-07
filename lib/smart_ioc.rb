@@ -15,6 +15,7 @@ module SmartIoC
   autoload :InjectMetadata,         'smart_ioc/inject_metadata'
   autoload :Iocify,                 'smart_ioc/iocify'
   autoload :Scopes,                 'smart_ioc/scopes'
+  autoload :StringUtils,            'smart_ioc/string_utils'
 
   module Scopes
     autoload :Bean,      'smart_ioc/scopes/bean'
