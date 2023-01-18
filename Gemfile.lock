@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    smart_ioc (0.3.8)
+    smart_ioc (0.3.9)
 
 GEM
   remote: https://rubygems.org/
@@ -47,4 +47,4 @@ DEPENDENCIES
   smart_ioc!
 
 BUNDLED WITH
-   2.1.2
+   2.3.25
