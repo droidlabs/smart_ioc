@@ -10,6 +10,15 @@ SmartIoC is a smart and really simple IoC container for Ruby applications.
 ## Installation
 `gem install smart_ioc`
 
+## Ruby versions
+
+Please install specific smart_ioc version, depending on Ruby version.
+
+| Ruby Version | SmartIoC Version |
+| ------------ | ------------ |
+| < 3.0  | 0.3.2 |
+| >= 3.0 | 0.4.0 |
+
 ## Setup
    Set package name and source package folder with beans. SmartIoC will parse source files and detect bean definitions automatically for you.
 
