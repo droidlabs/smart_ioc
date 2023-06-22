@@ -1,7 +1,6 @@
 # SmartIoC
 [![Rspec](https://github.com/droidlabs/smart_ioc/workflows/Rspec/badge.svg)](https://github.com/droidlabs/smart_ioc/actions?query=workflow%3ARspec)
-[![Code Climate](https://codeclimate.com/github/ddd-ruby/smart_ioc/badges/gpa.svg)](https://codeclimate.com/github/ddd-ruby/smart_ioc)
-[![Dependency Status](https://gemnasium.com/ddd-ruby/smart_ioc.png)](https://gemnasium.com/ddd-ruby/smart_ioc)
+[![Code Climate](https://codeclimate.com/github/ddd-ruby/smart_ioc/badges/gpa.svg)](https://codeclimate.com/github/ddd-ruby/smart_ioc) 
 
 
 SmartIoC is a smart and really simple IoC container for Ruby applications.
