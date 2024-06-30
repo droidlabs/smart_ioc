@@ -34,7 +34,9 @@ class SmartIoC::BeanLocations
 
     # @return names of all found beans
     def all_bean_names
-      @data.keys
+      @data.flat_map do |package_name, beans|
+        beans.map {|name, location| name}
+      end
     end
 
     def get_bean_by_path(path)
