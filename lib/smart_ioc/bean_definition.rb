@@ -64,4 +64,15 @@ class SmartIoC::BeanDefinition
     str << "factory_method: #{@factory_method}"
     str.join("\n")
   end
+
+  def preload
+    @dependencies.each do |dep|
+      SmartIoC::Container.get_instance.get_bean(
+        dep.ref || dep.bean_name,
+        package: dep.package,
+        parent_bean_definition: self,
+        parent_bean_name: name,
+      ).class._smart_ioc_preload_; nil
+    end
+  end
 end

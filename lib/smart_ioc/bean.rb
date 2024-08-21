@@ -33,7 +33,7 @@ def bean(bean_name, &proc)
           end
         end
       end
-        
+
       #{klass_name} = klass
     )
   )
