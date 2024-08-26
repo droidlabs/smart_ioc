@@ -18,7 +18,7 @@ describe SmartIoC::Container do
 
   it 'loads recursive beans' do
     users_creator = @container.get_bean(:users_creator)
-    uc2 = users_creator.send(:repository).users_creator
+    uc2 = users_creator.send(:repository).send(:users_creator)
     expect(users_creator).to eq(uc2)
   end
 end

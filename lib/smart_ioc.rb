@@ -16,6 +16,7 @@ module SmartIoC
   autoload :InjectMetadata,         'smart_ioc/inject_metadata'
   autoload :Iocify,                 'smart_ioc/iocify'
   autoload :Scopes,                 'smart_ioc/scopes'
+  autoload :StringUtils,            'smart_ioc/string_utils'
 
   module Scopes
     autoload :Bean,      'smart_ioc/scopes/bean'
@@ -78,7 +79,7 @@ module SmartIoC
 
     container_methods = [
       :register_bean,
-      :get_bean_definition_by_class,
+      :get_bean_definition,
       :set_extra_context_for_package,
       :get_bean,
       :clear_scopes,
@@ -89,3 +90,5 @@ module SmartIoC
     def_delegators :container, *container_methods
   end
 end
+
+require 'smart_ioc/bean'

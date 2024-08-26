@@ -16,8 +16,7 @@ describe SmartIoC::BeanDefinition do
       )
 
       str =
-"class:          Object
-name:           :test_bean
+"name:           :test_bean
 package:        :test_package
 context:        :default
 path:           current_dir

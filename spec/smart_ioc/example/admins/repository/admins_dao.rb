@@ -1,7 +1,5 @@
-class AdminsDAO
-  include SmartIoC::Iocify
-
-  bean :dao, instance: false, after_init: :setup
+bean :dao do
+  after_init :setup
 
   inject :config
 

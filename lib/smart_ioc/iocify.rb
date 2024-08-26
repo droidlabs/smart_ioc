@@ -2,6 +2,9 @@
 # Example of usage:
 # class Bar
 #   bean :bar
+#
+#   def call
+#   end
 # end
 #
 # class Foo
@@ -12,6 +15,7 @@
 #   inject :some_bar, ref: bar, from: :repository
 #
 #   def hello_world
+#     some_bar.call
 #     puts 'Hello world'
 #   end
 # end
@@ -23,6 +27,35 @@ module SmartIoC::Iocify
   end
 
   module ClassMethods
+    def package(name)
+      raise ArgumentError, "name should be a Symbol" if !name.is_a?(Symbol)
+      @package = name
+    end
+
+    def context(name)
+      raise ArgumentError, "name should be a Symbol" if !name.is_a?(Symbol)
+      @context = name
+    end
+
+    def factory_method(name)
+      raise ArgumentError, "name should be a Symbol" if !name.is_a?(Symbol)
+      @factory_method = name
+    end
+
+    def scope(name)
+      raise ArgumentError, "name should be a Symbol" if !name.is_a?(Symbol)
+      @scope = name
+    end
+
+    def instance
+      @instance = true
+    end
+
+    def after_init(name)
+      raise ArgumentError, "name should be a Symbol" if !name.is_a?(Symbol)
+      @after_init = name
+    end
+
     # @param bean_name [Symbol] bean name
     # @param scope [Symbol] bean scope (defaults to :singleton)
     # @param package [nil or Symbol]
@@ -31,10 +64,11 @@ module SmartIoC::Iocify
     # @param context [Symbol] set bean context (ex: :test)
     # @param after_init [Symbol] name of bean method that will be called after bean initialization (ex: :test)
     # @return nil
-    def bean(bean_name, scope: nil, package: nil, instance: true, factory_method: nil, context: nil, after_init: nil)
-      file_path = caller[0].split(':').first
-
-      bean_definition = SmartIoC.get_bean_definition_by_class(self)
+    def bean(bean_name, scope: nil, package: nil, instance: true, factory_method: nil, context: nil, after_init: nil, file_path: nil)
+      file_path ||= caller[0].split(':').first
+      package ||= SmartIoC::BeanLocations.get_bean_package(file_path)
+      context ||= SmartIoC::Container::DEFAULT_CONTEXT
+      bean_definition = SmartIoC.get_bean_definition(bean_name, package, context)
 
       if bean_definition
         if bean_definition.path == file_path
@@ -68,7 +102,18 @@ module SmartIoC::Iocify
         )
       end
 
+      self.instance_variable_set(:@bean_definition, bean_definition)
+
       nil
+    end
+
+    def inject(bean_name, ref: nil, from: nil)
+      if @anonymous_bean
+        @injects ||= []
+        @injects.push({bean_name: bean_name, ref: ref, from: from})
+      else
+        register_inject(bean_name, ref: ref, from: from)
+      end
     end
 
     # @param bean_name [Symbol] injected bean name
@@ -79,14 +124,14 @@ module SmartIoC::Iocify
     # @raise [ArgumentError] if ref provided and ref is not a Symbol
     # @raise [ArgumentError] if from provided and from is not a Symbol
     # @raise [ArgumentError] if bean with same name was injected before
-    def inject(bean_name, ref: nil, from: nil)
-      bean_definition = SmartIoC::Container.get_instance.get_bean_definition_by_class(self)
-
-      if bean_definition.nil?
+    def register_inject(bean_name, ref: nil, from: nil)
+      if !@bean_definition
         raise ArgumentError, "#{self.to_s} is not registered as bean. Add `bean :bean_name` declaration"
       end
 
-      bean_definition.add_dependency(
+      bd = @bean_definition
+
+      bd.add_dependency(
         bean_name: bean_name,
         ref:       ref,
         package:   from
@@ -97,18 +142,18 @@ module SmartIoC::Iocify
         return bean if bean
 
         klass = self.is_a?(Class) ? self : self.class
-        bean_definition = SmartIoC::Container.get_instance.get_bean_definition_by_class(klass)
 
         bean = SmartIoC::Container.get_instance.get_bean(
           ref || bean_name,
           package: from,
-          parent_bean_definition: bean_definition
+          parent_bean_definition: bd,
+          parent_bean_name: bd.name,
         )
 
         instance_variable_set(:"@#{bean_name}", bean)
       end
 
-      if bean_definition.is_instance?
+      if bd.is_instance?
         define_method bean_name, &bean_method
         private bean_name
       else

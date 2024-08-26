@@ -6,5 +6,6 @@ gemspec
 group :test do
   gem 'rspec'
   gem 'simplecov'
+  gem 'simplecov-html', '0.12.3'
   gem 'byebug'
 end
