@@ -1,5 +1,6 @@
 require 'smart_ioc/version'
 require 'benchmark'
+require 'forwardable'
 
 module SmartIoC
   autoload :Args,                   'smart_ioc/args'
@@ -74,13 +75,19 @@ module SmartIoC
       Container.get_instance
     end
 
-    [:register_bean, :get_bean_definition,
-     :set_extra_context_for_package, :get_bean, :clear_scopes,
-     :force_clear_scopes, :set_load_proc].each do |name|
-      define_method name do |*args, &block|
-        container.send(name, *args, &block)
-      end
-   end
+    extend Forwardable
+
+    container_methods = [
+      :register_bean,
+      :get_bean_definition,
+      :set_extra_context_for_package,
+      :get_bean,
+      :clear_scopes,
+      :force_clear_scopes,
+      :set_load_proc
+    ]
+
+    def_delegators :container, *container_methods
   end
 end
 
