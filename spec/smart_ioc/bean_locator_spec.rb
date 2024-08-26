@@ -13,7 +13,6 @@ describe SmartIoC::BeanLocator do
     locations = SmartIoC::BeanLocations.get_bean_locations(:repository)
 
     expect(locations[:test].size).to eq(3)
-
     expect(locations[:test][0]).to match(/example\/admins\/repository\/admins_repository.rb/)
     expect(locations[:test][1]).to match(/example\/admins\/repository\/test\/admins_repository.rb/)
     expect(locations[:test][2]).to match(/example\/users\/repository\/users_repository.rb/)
