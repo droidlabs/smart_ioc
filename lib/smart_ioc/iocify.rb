@@ -168,5 +168,9 @@ module SmartIoC::Iocify
 
       nil
     end
+
+    def _smart_ioc_preload_
+      @bean_definition&.preload; nil
+    end
   end
 end
