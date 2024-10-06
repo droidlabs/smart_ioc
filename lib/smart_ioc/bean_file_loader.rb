@@ -17,6 +17,7 @@ class SmartIoC::BeanFileLoader
     locations.each do |location|
       next if @loaded_locations.has_key?(location)
       @loaded_locations[location] = true
+      puts location
       @load_proc.call(location)
     end
 

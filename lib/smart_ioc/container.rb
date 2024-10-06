@@ -90,8 +90,12 @@ module SmartIoC
     # @param package [Symbol]
     # @param context [Symbol]
     # return [BeanDefinition]
-    def get_bean_definition(bean_name, package, context)
+    def find_bean_definition(bean_name, package, context)
       bean_definitions_storage.find_bean(bean_name, package, context)
+    end
+
+    def get_bean_definition(...)
+      bean_factory.get_bean_definition(...)
     end
 
     # Sets new load proc

@@ -32,16 +32,7 @@ class SmartIoC::BeanFactory
   # @raise [ArgumentError] if bean is not found
   # @raise [ArgumentError] if ambiguous bean definition was found
   def get_bean(bean_name, package: nil, parent_bean_definition: nil, context: nil, parent_bean_name: nil)
-    check_arg(bean_name, :bean_name, Symbol)
-    check_arg(package, :package, Symbol) if package
-    check_arg(parent_bean_definition, :parent_bean_definition, SmartIoC::BeanDefinition) if parent_bean_definition
-    check_arg(context, :context, Symbol) if context
-
-    @bean_file_loader.require_bean(bean_name)
-
-    parent_package_name = parent_bean_definition ? parent_bean_definition.package : nil
-    context = autodetect_context(bean_name, package, parent_package_name, context, parent_bean_name)
-    bean_definition = @bean_definitions_storage.find(bean_name, package, context, parent_package_name)
+    bean_definition = get_bean_definition(bean_name, package:, parent_bean_definition:, context:, parent_bean_name:)
     scope = get_scope(bean_definition)
     bean = scope.get_bean(bean_definition.klass)
 
@@ -54,6 +45,19 @@ class SmartIoC::BeanFactory
   rescue SmartIoC::Errors::AmbiguousBeanDefinition => e
     e.parent_bean_definition = parent_bean_definition
     raise e
+  end
+
+  def get_bean_definition(bean_name, package: nil, context: nil, parent_bean_definition: nil, parent_bean_name: nil)
+    check_arg(bean_name, :bean_name, Symbol)
+    check_arg(package, :package, Symbol) if package
+    check_arg(parent_bean_definition, :parent_bean_definition, SmartIoC::BeanDefinition) if parent_bean_definition
+    check_arg(context, :context, Symbol) if context
+
+    @bean_file_loader.require_bean(bean_name)
+
+    parent_package_name = parent_bean_definition ? parent_bean_definition.package : nil
+    context = autodetect_context(bean_name, package, parent_package_name, context, parent_bean_name)
+    bean_definition = @bean_definitions_storage.find(bean_name, package, context, parent_package_name)
   end
 
   private
