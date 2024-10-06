@@ -2,11 +2,11 @@ class SmartIoC::BeanDefinitionsStorage
   include SmartIoC::Errors
 
   def initialize
-    @collection = []
+    @collection = Hash.new { |h, k| h[k] = [] }
   end
 
   def clear_dependencies
-    @collection.each do |bd|
+    @collection.values.flatten.each do |bd|
       bd.dependencies.each do |dependency|
         dependency.bean_definition = nil
       end
@@ -15,12 +15,12 @@ class SmartIoC::BeanDefinitionsStorage
 
   # @param bean_definition [BeanDefinition]
   def push(bean_definition)
-    existing_bd = @collection.detect do |bd|
-      bd == bean_definition
-    end
+    bd_scope = @collection[bean_definition.name]
+
+    existing_bd = bd_scope.detect { |bd| bd == bean_definition }
 
     if existing_bd
-      @collection.reject! { |bd| bd == existing_bd }
+      bd_scope.reject! { |bd| bd == bean_definition }
 
       message = <<~EOF
         \nReplacing bean definition...
@@ -34,22 +34,15 @@ class SmartIoC::BeanDefinitionsStorage
       puts message
     end
 
-    @collection.push(bean_definition)
+    bd_scope.push(bean_definition)
   end
 
-  def delete_by_class(klass)
-    klass_str = klass.to_s
-    bean = @collection.detect {|bd| bd.klass.to_s == klass_str}
+  def delete(bean_definition)
+    bd_scope = @collection[bean_definition.name]
 
-    if bean
-      @collection.delete(bean)
-    end
-  end
+    bd_scope.delete_if { |bd| bd.klass.to_s == bean_definition.klass.to_s }
 
-  # @param klass [Class] bean class
-  # @return bean definition [BeanDefinition] or nil
-  def find_by_class(klass)
-    @collection.detect {|bd| bd.klass == klass}
+    nil
   end
 
   # Returns bean definition for specific class
@@ -58,27 +51,23 @@ class SmartIoC::BeanDefinitionsStorage
   # @param context [Symbol]
   # @return bean definition [BeanDefinition] or nil
   def find_bean(bean_name, package, context)
-    @collection.detect {|bd| bd.name == bean_name && bd.package == package && bd.context == context}
+    @collection[bean_name].detect do |bd|
+      bd.name == bean_name && bd.package == package && bd.context == context
+    end
   end
 
   def filter_by(bean_name, package = nil, context = nil)
-    bean_definitions = @collection.select do |bd|
-      bd.name == bean_name
-    end
+    bd_scope = @collection[bean_name]
 
     if package
-      bean_definitions = bean_definitions.select do |bd|
-        bd.package == package
-      end
+      bd_scope = bd_scope.select { |bd| bd.package == package }
     end
 
     if context
-      bean_definitions = bean_definitions.select do |bd|
-        bd.context == context
-      end
+      bd_scope = bean_definitions.select { |bd| bd.context == context }
     end
 
-    bean_definitions
+    bd_scope
   end
 
   # @bean_name [Symbol] bean name
@@ -112,26 +101,18 @@ class SmartIoC::BeanDefinitionsStorage
   # @package [Symbol, nil] package name
   # @context [Symbol, nil] context
   def filter_by_with_drop_to_default_context(bean_name, package = nil, context = nil)
-    bean_definitions = @collection.select do |bd|
-      bd.name == bean_name
-    end
+    bd_scope = @collection[bean_name]
 
     if package
-      bean_definitions = bean_definitions.select do |bd|
-        bd.package == package
-      end
+      bd_scope = bd_scope.select { |bd| bd.package == package }
     end
 
     if context
-      context_bean_definitions = bean_definitions.select do |bd|
-        bd.context == context
-      end
+      context_bean_definitions = bd_scope.select { |bd| bd.context == context }
 
-      if !context_bean_definitions.empty?
-        bean_definitions = context_bean_definitions
-      end
+      bd_scope = context_bean_definitions if context_bean_definitions.any?
     end
 
-    bean_definitions
+    bd_scope
   end
 end

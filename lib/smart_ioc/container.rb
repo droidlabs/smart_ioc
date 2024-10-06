@@ -19,10 +19,10 @@ module SmartIoC
       raise ArgumentError, "SmartIoC::Container should not be allocated. Use SmartIoC::Container.get_instance instead"
     end
 
-    # @param klass [Class] bean class name
+    # @param klass [BeanDefinition] bean class name
     # @return nil
-    def unregister_bean(klass)
-      bean_definitions_storage.delete_by_class(klass)
+    def unregister_bean(bean_definition)
+      bean_definitions_storage.delete(bean_definition)
       clear_scopes
       nil
     end

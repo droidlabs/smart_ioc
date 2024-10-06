@@ -74,9 +74,8 @@ module SmartIoC::Iocify
         if bean_definition.path == file_path
           # seems that file with bean definition was reloaded
           # lets clear all scopes so we do not have
-          container = SmartIoC::Container.get_instance
-          container.unregister_bean(self)
-          container.force_clear_scopes
+          SmartIoC::Container.get_instance.unregister_bean(bean_definition)
+          SmartIoC::Container.get_instance.force_clear_scopes
         else
           raise ArgumentError, "bean with for class #{self.to_s} was already defined in #{bean_definition.path}"
         end
