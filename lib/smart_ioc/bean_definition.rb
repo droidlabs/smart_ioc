@@ -67,12 +67,14 @@ class SmartIoC::BeanDefinition
 
   def preload
     @dependencies.each do |dep|
-      SmartIoC::Container.get_instance.get_bean(
-        dep.ref || dep.bean_name,
+      bd = SmartIoC.get_bean_definition(
+        dep.ref,
         package: dep.package,
         parent_bean_definition: self,
         parent_bean_name: name,
-      ).class._smart_ioc_preload_; nil
+      )
+
+      bd.preload
     end
   end
 end

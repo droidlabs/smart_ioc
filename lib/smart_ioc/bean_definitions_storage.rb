@@ -46,12 +46,6 @@ class SmartIoC::BeanDefinitionsStorage
     end
   end
 
-  # @param klass [Class] bean class
-  # @return bean definition [BeanDefinition] or nil
-  def find_by_class(klass)
-    @collection.detect {|bd| bd.klass == klass}
-  end
-
   # Returns bean definition for specific class
   # @param bean_name [Symbol]
   # @param package [Symbol]

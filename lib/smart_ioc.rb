@@ -80,6 +80,7 @@ module SmartIoC
     container_methods = [
       :register_bean,
       :get_bean_definition,
+      :find_bean_definition,
       :set_extra_context_for_package,
       :get_bean,
       :clear_scopes,
