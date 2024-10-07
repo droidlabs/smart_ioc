@@ -68,7 +68,7 @@ module SmartIoC::Iocify
       file_path ||= caller[0].split(':').first
       package ||= SmartIoC::BeanLocations.get_bean_package(file_path)
       context ||= SmartIoC::Container::DEFAULT_CONTEXT
-      bean_definition = SmartIoC.get_bean_definition(bean_name, package, context)
+      bean_definition = SmartIoC.find_bean_definition(bean_name, package, context)
 
       if bean_definition
         if bean_definition.path == file_path
@@ -166,10 +166,6 @@ module SmartIoC::Iocify
       end
 
       nil
-    end
-
-    def _smart_ioc_preload_
-      @bean_definition&.preload; nil
     end
   end
 end

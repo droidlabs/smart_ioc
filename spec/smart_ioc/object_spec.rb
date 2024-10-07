@@ -32,7 +32,7 @@ describe Object do
                        factory_method: :my_method, context: :test
       end
 
-      @bean_definition = SmartIoC.get_bean_definition(:my_bean, :my_package, :test)
+      @bean_definition = SmartIoC.find_bean_definition(:my_bean, :my_package, :test)
     end
 
     it { expect(@bean_definition.name).to eq(:my_bean) }
