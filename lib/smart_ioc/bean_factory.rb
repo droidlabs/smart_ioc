@@ -12,7 +12,6 @@ class SmartIoC::BeanFactory
     @singleton_scope          = SmartIoC::Scopes::Singleton.new
     @prototype_scope          = SmartIoC::Scopes::Prototype.new
     @thread_scope             = SmartIoC::Scopes::Request.new
-    @semaphore                = Mutex.new
   end
 
   def clear_scopes
