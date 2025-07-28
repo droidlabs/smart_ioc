@@ -2,6 +2,7 @@ class SmartIoC::BeanFileLoader
   def initialize
     @loaded_locations = {}
     @load_proc        = Proc.new { |location| load(location) }
+    @semaphore        = Mutex.new
   end
 
   def set_load_proc(&block)
@@ -17,7 +18,10 @@ class SmartIoC::BeanFileLoader
     locations.each do |location|
       next if @loaded_locations.has_key?(location)
       @loaded_locations[location] = true
-      @load_proc.call(location)
+
+      @semaphore.synchronize do
+        @load_proc.call(location)
+      end
     end
 
     nil
